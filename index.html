@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренировочный журнал</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15151a;
+  --surface:#1e1f26;
+  --surface2:#26272f;
+  --line:#34353e;
+  --text:#ECEAE4;
+  --muted:#8b8d96;
+  --accent:#E8B23D;
+  --accent-dim:#5b4a1f;
+  --steel:#4F7CFF;
+  --danger:#E2574C;
+  --good:#5FBF7A;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
+h1,h2,h3,.disp{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.03em;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+#app{display:flex;min-height:100vh;}
+nav{width:210px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--line);padding:24px 0;}
+nav .brand{padding:0 20px 20px;border-bottom:1px solid var(--line);margin-bottom:12px;}
+nav .brand .disp{font-size:20px;color:var(--accent);font-weight:700;}
+nav .brand .sub{font-size:11px;color:var(--muted);margin-top:2px;}
+nav button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);
+  font-family:'Oswald',sans-serif;font-size:14px;letter-spacing:.04em;text-transform:uppercase;
+  padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:.15s;}
+nav button:hover{color:var(--text);background:var(--surface2);}
+nav button.active{color:var(--accent);border-left-color:var(--accent);background:var(--surface2);}
+main{flex:1;padding:32px 40px;max-width:1100px;}
+.page{display:none;}
+.page.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+h1.page-title{font-size:26px;margin:0 0 4px;color:var(--text);}
+.page-sub{color:var(--muted);font-size:13px;margin-bottom:24px;}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;}
+.card h2{font-size:15px;color:var(--accent);margin:0 0 16px;letter-spacing:.05em;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
+.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
+  padding:9px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:14px;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;}
+.result-row:last-child{border-bottom:none;}
+.result-row .val{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);}
+.result-row.big .val{font-size:20px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;
+  padding:8px 10px;border-bottom:1px solid var(--line);}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;text-transform:uppercase;letter-spacing:.03em;font-weight:600;}
+.tag.home{background:#233450;color:#8ab4ff;}
+.tag.outside{background:#4a2f22;color:#f2a86b;}
+.tag.both{background:#2e3a2b;color:#9fd68a;}
+.tag.rest{background:#2c2c2f;color:var(--muted);}
+.day-block{margin-bottom:22px;}
+.day-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.day-head .dname{font-family:'Oswald',sans-serif;font-size:17px;text-transform:uppercase;letter-spacing:.03em;}
+.circle-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px;}
+.btn{background:var(--accent);color:#1a1508;border:none;padding:9px 18px;border-radius:6px;font-family:'Oswald',sans-serif;
+  text-transform:uppercase;letter-spacing:.03em;font-size:13px;font-weight:600;cursor:pointer;}
+.btn:hover{filter:brightness(1.08);}
+.btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
+.btn.danger{background:var(--danger);color:#fff;}
+.entry-form{display:grid;grid-template-columns:130px 1fr 70px 70px 70px 70px 1fr auto;gap:8px;align-items:end;}
+.entry-form .field{margin:0;}
+.journal-row{display:grid;grid-template-columns:100px 110px 1fr 60px 60px 60px 60px 60px 1fr 30px;gap:8px;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--line);font-size:12px;}
+.journal-row.head{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.03em;font-weight:600;}
+.journal-row .del{color:var(--danger);cursor:pointer;text-align:center;}
+.filter-bar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.filter-bar select{background:var(--surface2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:6px;font-size:13px;}
+.progress-wrap{display:flex;align-items:center;gap:10px;}
+.progress-gauge{flex:1;height:14px;background:var(--surface2);border-radius:3px;position:relative;overflow:hidden;
+  background-image:repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px 10%);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--steel),var(--accent));border-radius:3px 0 0 3px;transition:width .4s ease;}
+.progress-pct{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);width:38px;text-align:right;}
+.stat-card{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.stat-card .name{font-weight:600;font-size:14px;margin-bottom:8px;}
+.stat-meta{display:flex;gap:18px;margin-top:8px;font-size:11px;color:var(--muted);flex-wrap:wrap;}
+.stat-meta b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
+.top-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.top-stats .box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;text-align:center;}
+.top-stats .box .n{font-family:'IBM Plex Mono',monospace;font-size:24px;color:var(--accent);font-weight:600;}
+.top-stats .box .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-top:4px;}
+.chart{display:flex;align-items:flex-end;gap:4px;height:140px;padding-top:10px;}
+.chart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent-dim));border-radius:3px 3px 0 0;position:relative;min-height:2px;}
+.chart .bar span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted);}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;}
+.export-bar{display:flex;gap:10px;margin-top:20px;}
+.tech-note{font-size:12px;color:var(--muted);line-height:1.5;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+
+.topbar{display:none;}
+.overlay{display:none;}
+
+@media (max-width: 860px){
+  #app{flex-direction:column;}
+  .topbar{
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface);border-bottom:1px solid var(--line);
+    padding:12px 16px;position:sticky;top:0;z-index:20;
+  }
+  .topbar .hamburger{
+    width:34px;height:34px;flex-shrink:0;background:var(--surface2);border:1px solid var(--line);
+    border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .topbar .hamburger span{display:block;width:16px;height:2px;background:var(--text);position:relative;}
+  .topbar .hamburger span::before,.topbar .hamburger span::after{
+    content:"";position:absolute;left:0;width:16px;height:2px;background:var(--text);
+  }
+  .topbar .hamburger span::before{top:-5px;}
+  .topbar .hamburger span::after{top:5px;}
+  .topbar .disp{font-size:17px;color:var(--accent);font-weight:700;}
+
+  nav{
+    position:fixed;top:0;left:0;bottom:0;width:230px;z-index:30;
+    transform:translateX(-100%);transition:transform .25s ease;
+    box-shadow:2px 0 20px rgba(0,0,0,.4);
+  }
+  nav.open{transform:translateX(0);}
+  .overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:25;
+  }
+  .overlay.open{display:block;}
+
+  main{padding:18px 16px 60px;max-width:100%;}
+  .grid2{grid-template-columns:1fr;gap:16px;}
+  .top-stats{grid-template-columns:repeat(2,1fr);}
+  .entry-form{grid-template-columns:1fr 1fr;}
+  .entry-form .btn{grid-column:1 / -1;}
+  .journal-table-wrap{overflow-x:auto;}
+  .journal-row,.journal-row.head{min-width:640px;}
+  h1.page-title{font-size:21px;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="hamburger" onclick="toggleNav()"><span></span></div>
+    <div class="disp">Železo</div>
+  </div>
+  <div class="overlay" id="overlay" onclick="closeNav()"></div>
+  <nav id="mainNav">
+    <div class="brand">
+      <div class="disp">Železo</div>
+      <div class="sub">трекер / калькулятор</div>
+    </div>
+    <button data-page="dashboard" class="active">Дашборд</button>
+    <button data-page="kbju">КБЖУ</button>
+    <button data-page="schedule">График</button>
+    <button data-page="reference">Справочник</button>
+    <button data-page="journal">Журнал</button>
+    <button data-page="quickpaste">Быстрый ввод</button>
+    <button data-page="settings">Настройки / Синк</button>
+  </nav>
+  <main>
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <h1 class="page-title">Дашборд</h1>
+      <div class="page-sub">Прогресс по всем упражнениям на основе журнала</div>
+      <div class="top-stats">
+        <div class="box"><div class="n" id="dbWeek">—</div><div class="l">Неделя программы</div></div>
+        <div class="box"><div class="n" id="dbSessions">—</div><div class="l">Тренировок записано</div></div>
+        <div class="box"><div class="n" id="dbStart">—</div><div class="l">Дата начала</div></div>
+        <div class="box"><div class="n" id="dbToday">—</div><div class="l">Сегодня</div></div>
+      </div>
+
+      <div class="card">
+        <h2>Объём тренировок по неделям</h2>
+        <div class="chart" id="weekChart"></div>
+      </div>
+
+      <div class="card">
+        <h2>Прогресс по упражнениям</h2>
+        <div id="statList"></div>
+      </div>
+    </section>
+
+    <!-- KBJU -->
+    <section class="page" id="page-kbju">
+      <h1 class="page-title">Расчёт КБЖУ</h1>
+      <div class="page-sub">Формула Mifflin-St Jeor, набор массы</div>
+      <div class="grid2">
+        <div class="card">
+          <h2>Исходные данные</h2>
+          <div class="field"><label>Вес, кг</label><input type="number" id="inWeight" value="75"></div>
+          <div class="field"><label>Рост, см</label><input type="number" id="inHeight" value="185"></div>
+          <div class="field"><label>Возраст, лет</label><input type="number" id="inAge" value="25"></div>
+          <div class="field"><label>Активность</label>
+            <select id="inActivity">
+              <option value="1.2">Малоподвижный</option>
+              <option value="1.375">Лёгкая активность</option>
+              <option value="1.55" selected>Умеренная (4-5 трен/нед)</option>
+              <option value="1.725">Высокая</option>
+            </select>
+          </div>
+          <div class="field"><label>Профицит калорий, ккал</label><input type="number" id="inSurplus" value="400"></div>
+          <div class="field"><label>Белок, г/кг</label><input type="number" step="0.1" id="inProtein" value="2.0"></div>
+          <div class="field"><label>Жиры, % от калорий</label><input type="number" id="inFatPct" value="22"></div>
+        </div>
+        <div class="card">
+          <h2>Результат</h2>
+          <div class="result-row"><span>BMR (базовый обмен)</span><span class="val" id="outBmr">—</span></div>
+          <div class="result-row"><span>TDEE (общий расход)</span><span class="val" id="outTdee">—</span></div>
+          <div class="result-row big"><span>Целевая калорийность</span><span class="val" id="outTarget">—</span></div>
+          <div class="result-row"><span>Белок</span><span class="val" id="outProteinG">—</span></div>
+          <div class="result-row"><span>Жиры</span><span class="val" id="outFatG">—</span></div>
+          <div class="result-row"><span>Углеводы</span><span class="val" id="outCarbG">—</span></div>
+          <div class="note">Пересчитывается сразу при изменении любого поля. Данные сохраняются в браузере.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="page" id="page-schedule">
+      <h1 class="page-title">Недельный график</h1>
+      <div class="page-sub">Суперсет = пара упражнений на противоположные группы мышц. Подход первого → 15-30 сек → подход второго → отдых 60-90 сек → повтор круга.</div>
+      <div id="scheduleContent"></div>
+    </section>
+
+    <!-- REFERENCE -->
+    <section class="page" id="page-reference">
+      <h1 class="page-title">Справочник упражнений</h1>
+      <div class="page-sub">Целевые диапазоны и техника выполнения</div>
+      <div class="card">
+        <table>
+          <thead><tr><th>Упражнение</th><th>Где</th><th>Цель</th><th>Техника</th></tr></thead>
+          <tbody id="refTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- JOURNAL -->
+    <section class="page" id="page-journal">
+      <h1 class="page-title">Журнал тренировок</h1>
+      <div class="page-sub">Добавляй результат после каждой тренировки</div>
+
+      <div class="card">
+        <h2>Новая запись</h2>
+        <div class="entry-form">
+          <div class="field"><label>Дата</label><input type="date" id="jDate"></div>
+          <div class="field"><label>Упражнение</label><select id="jExercise"></select></div>
+          <div class="field"><label>П1</label><input type="number" id="jS1"></div>
+          <div class="field"><label>П2</label><input type="number" id="jS2"></div>
+          <div class="field"><label>П3</label><input type="number" id="jS3"></div>
+          <div class="field"><label>П4</label><input type="number" id="jS4"></div>
+          <div class="field"><label>Заметки</label><input type="text" id="jNotes"></div>
+          <button class="btn" onclick="addEntry()">Добавить</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>История</h2>
+        <div class="filter-bar">
+          <select id="filterExercise" onchange="renderJournalList()"><option value="">Все упражнения</option></select>
+        </div>
+        <div class="journal-table-wrap">
+        <div class="journal-row head">
+          <div>Дата</div><div>День</div><div>Упражнение</div><div>П1</div><div>П2</div><div>П3</div><div>П4</div><div>Итого</div><div>Заметки</div><div></div>
+        </div>
+        <div id="journalList"></div>
+        </div>
+      </div>
+
+      <div class="export-bar">
+        <button class="btn secondary" onclick="exportData()">Экспорт данных (.json)</button>
+        <button class="btn secondary" onclick="document.getElementById('importFile').click()">Импорт данных</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
+    </section>
+
+    <!-- QUICK PASTE -->
+    <section class="page" id="page-quickpaste">
+      <h1 class="page-title">Быстрый ввод</h1>
+      <div class="page-sub">Вставь текст из заметок — приложение само разберёт даты, упражнения и подходы</div>
+
+      <div class="card">
+        <h2>Формат (пиши примерно так)</h2>
+        <div class="tech-note">
+          Дата на отдельной строке: <b>06.07</b> или <b>06.07.2026</b><br>
+          Дальше упражнения, каждое на своей строке: <b>Название 14 9 8 6</b><br>
+          Заметку можно добавить через " - " или "//" в конце: <b>Планка 60 40 30 20 // тяжело</b><br>
+          Числа можно разделять пробелом, запятой или "x". Название не обязано быть точным — сопоставим сами.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Вставь текст</h2>
+        <textarea id="pasteInput" rows="10" style="width:100%;background:var(--surface2);border:1px solid var(--line);
+          color:var(--text);padding:12px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;"
+          placeholder="06.07&#10;Отжимания классические 14 9 8 6&#10;Обратные отжимания 9 9 8 6&#10;Планка 60 40 30 20 // тяжело&#10;&#10;07.07&#10;Приседания 20 20 18 15"></textarea>
+        <div style="margin-top:12px;">
+          <button class="btn" onclick="parsePaste()">Разобрать</button>
+        </div>
+      </div>
+
+      <div class="card" id="pastePreviewCard" style="display:none;">
+        <h2>Проверь перед добавлением</h2>
+        <div id="pastePreview"></div>
+        <div style="margin-top:14px;">
+          <button class="btn" onclick="commitPaste()">Добавить отмеченные в журнал</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS / SYNC -->
+    <section class="page" id="page-settings">
+      <h1 class="page-title">Настройки и синхронизация</h1>
+      <div class="page-sub">Свяжи телефон и ПК через бесплатное облачное хранилище (Firebase). Без настройки всё работает локально, как раньше.</div>
+
+      <div class="card">
+        <h2>Статус</h2>
+        <div class="result-row"><span>Облако</span><span class="val" id="syncStatus">не настроено</span></div>
+        <div class="result-row"><span>Последняя синхронизация</span><span class="val" id="syncLast">—</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Подключение</h2>
+        <div class="field">
+          <label>Firebase config (вставь весь объект целиком из консоли Firebase)</label>
+          <textarea id="fbConfig" rows="6" style="width:100%;background:var(--surface2);border:1px solid var(--line);
+            color:var(--text);padding:9px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", ...}'></textarea>
+        </div>
+        <div class="field">
+          <label>Код синхронизации (придумай любой — одинаковый на телефоне и ПК)</label>
+          <input type="text" id="fbSyncCode" placeholder="например: moy-trening-2026">
+        </div>
+        <button class="btn" onclick="connectSync()">Подключить</button>
+        <button class="btn secondary" onclick="pullFromCloud(true)">Синхронизировать сейчас</button>
+        <button class="btn danger" onclick="disconnectSync()">Отключить облако</button>
+        <div class="note" style="margin-top:14px;">
+          Как получить config и код: смотри инструкцию, которую прислал Claude в чате. Коротко — бесплатный проект
+          на console.firebase.google.com → Firestore Database → Project settings → скопировать объект конфигурации веб-приложения.
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
+// ---------------------------------------------------------------------
+// Reference data
+// ---------------------------------------------------------------------
+const EXERCISES = [
+  {name:"Отжимания классические", sets:3, min:15, max:20, unit:"повторений", where:"both",
+   tech:"Локти ~45° к корпусу, грудь почти касается пола, руки полностью выпрямляются вверху."},
+  {name:"Отжимания широким хватом", sets:3, min:15, max:20, unit:"повторений", where:"both",
+   tech:"Руки заметно шире плеч, акцент на растяжение и сведение груди."},
+  {name:"Отжимания с ногами на скамье", sets:3, min:12, max:15, unit:"повторений", where:"outside",
+   tech:"Ноги на скамье, руки на полу. Тело прямая линия, акцент на верх груди/плечи."},
+  {name:"Обратные отжимания (скамья/стул)", sets:3, min:12, max:15, unit:"повторений", where:"both",
+   tech:"Локти строго назад, плечи не тянутся к ушам, полная амплитуда вниз до угла ~90°."},
+  {name:"Отжимания на брусьях", sets:3, min:8, max:10, unit:"повторений", where:"outside",
+   tech:"Корпус слегка наклонён вперёд (акцент на грудь), локти уходят назад."},
+  {name:"Тяга гантели в наклоне", sets:3, min:12, max:15, unit:"повторений на руку", where:"home",
+   tech:"Наклон корпуса ~45°, спина прямая. Тянуть гантель к поясу, сводя лопатку в верхней точке."},
+  {name:"Жим гантели над головой", sets:3, min:10, max:12, unit:"повторений", where:"home",
+   tech:"Локоть под кистью, жать строго вверх, не прогибаться в пояснице."},
+  {name:"Подтягивания", sets:4, min:8, max:10, unit:"повторений", where:"outside",
+   tech:"Без раскачивания корпусом, руки полностью выпрямляются внизу."},
+  {name:"Инверсионная тяга", sets:4, min:12, max:15, unit:"повторений", where:"outside",
+   tech:"⚠ требует замены — нет подходящей низкой перекладины. Сводить лопатки в конце движения."},
+  {name:"Планка", sets:3, min:90, max:120, unit:"секунд", where:"both",
+   tech:"Тело прямая линия от головы до пяток, таз не провисает и не задирается."},
+  {name:"Пресс (подъём на 90°)", sets:3, min:20, max:25, unit:"повторений", where:"both",
+   tech:"Поясница прижата к полу, подъём за счёт живота, без рывков руками."},
+  {name:"Скручивания пресса", sets:3, min:25, max:30, unit:"повторений", where:"both",
+   tech:"Короткая амплитуда, работа именно от живота."},
+  {name:"Приседания", sets:3, min:20, max:25, unit:"повторений", where:"both",
+   tech:"Пятки не отрываются от пола, колени не проваливаются внутрь."},
+  {name:"Выпады назад", sets:3, min:12, max:15, unit:"повторений на ногу", where:"both",
+   tech:"Колено передней ноги под ~90°, корпус вертикально."},
+  {name:"Ягодичный мостик", sets:3, min:20, max:25, unit:"повторений", where:"both",
+   tech:"Сжимать ягодицы в верхней точке, не прогибаться в пояснице."},
+  {name:"Подъёмы на носки", sets:3, min:20, max:25, unit:"повторений", where:"both",
+   tech:"Полная амплитуда, медленный контролируемый спуск ниже уровня стопы."},
+  {name:"Болгарские сплит-приседания", sets:3, min:10, max:12, unit:"повторений на ногу", where:"both",
+   tech:"Задняя нога на возвышении, колено передней ноги не выходит за носок. Можно с гантелью."},
+  {name:"Бег (равномерный темп)", sets:1, min:25, max:30, unit:"минут", where:"outside",
+   tech:"Цель сейчас — 30 мин непрерывно. Через 2-3 мес — 5 км за 28-30 мин. Тест Купера раз в 6-8 недель."},
+  {name:"Интервалы (спринт/отдых)", sets:1, min:8, max:10, unit:"интервалов", where:"outside",
+   tech:"Сокращать отдых между спринтами по мере роста формы."},
+];
+
+const WHERE_LABEL = {home:["Дом","home"], outside:["Улица","outside"], both:["Дом / Улица","both"]};
+
+const SCHEDULE = [
+  {day:"Понедельник", place:"home", circles:[
+    {label:"Круг 1", ex:"Отжимания классические ↔ Тяга гантели в наклоне", sets:"3-4×15-20 / 3-4×12-15", muscles:"Грудь vs спина"},
+    {label:"Круг 2", ex:"Жим гантели над головой ↔ Тяга гантели в наклоне", sets:"3×10-12 / 3×12-15", muscles:"Плечи vs спина"},
+    {label:"—", ex:"Планка", sets:"3×40-60 сек", muscles:"Кор"},
+  ]},
+  {day:"Вторник", place:"home", circles:[
+    {label:"Круг 1", ex:"Приседания ↔ Ягодичный мостик", sets:"3-4×20-25 / 3-4×20-25", muscles:"Квадрицепс vs ягодицы"},
+    {label:"Круг 2", ex:"Выпады назад ↔ Подъёмы на носки", sets:"3×12-15 на ногу / 3×20-25", muscles:"Ноги vs икры"},
+    {label:"—", ex:"Пресс / скручивания", sets:"3×20-25", muscles:"Живот"},
+  ]},
+  {day:"Среда", place:"rest", circles:[{label:"—", ex:"Отдых", sets:"-", muscles:"Восстановление"}]},
+  {day:"Четверг", place:"outside", circles:[
+    {label:"Круг 1", ex:"Подтягивания ↔ Отжимания на брусьях", sets:"4×8-10 / 3×8-10", muscles:"Спина vs грудь/трицепс"},
+    {label:"Круг 2", ex:"Инверсионная тяга (замена) ↔ Отжимания с ногами на скамье", sets:"4×12-15 / 3×12-15", muscles:"Спина vs плечи/грудь"},
+    {label:"—", ex:"Планка", sets:"3×40-60 сек", muscles:"Кор"},
+  ]},
+  {day:"Пятница", place:"outside", circles:[
+    {label:"Круг 1", ex:"Болгарские сплит-приседания ↔ Ягодичный мостик", sets:"3×10-12 на ногу / 3-4×20-25", muscles:"Квадрицепс vs ягодицы"},
+    {label:"Круг 2", ex:"Приседания ↔ Подъёмы на носки", sets:"3×20-25 / 3×20-25", muscles:"Квадрицепс vs икры"},
+    {label:"—", ex:"Пресс", sets:"3×20-25", muscles:"Живот"},
+  ]},
+  {day:"Суббота", place:"outside", circles:[
+    {label:"—", ex:"Бег или интервалы", sets:"25-30 мин / 8-10 интервалов", muscles:"Ноги, сердце"},
+    {label:"—", ex:"Планка (легко)", sets:"2-3×40-60 сек", muscles:"Кор"},
+  ]},
+  {day:"Воскресенье", place:"rest", circles:[{label:"—", ex:"Отдых", sets:"-", muscles:"Восстановление"}]},
+];
+
+// ---------------------------------------------------------------------
+// Storage
+// ---------------------------------------------------------------------
+const LS_KBJU = "zt_kbju";
+const LS_JOURNAL = "zt_journal";
+
+function loadKbju(){
+  const raw = localStorage.getItem(LS_KBJU);
+  return raw ? JSON.parse(raw) : null;
+}
+function saveKbjuLocal(data){ localStorage.setItem(LS_KBJU, JSON.stringify(data)); }
+function saveKbju(data){
+  saveKbjuLocal(data);
+  localStorage.setItem('zt_local_updated', String(Date.now()));
+  if(typeof pushToCloud==='function') pushToCloud();
+}
+
+function loadJournal(){
+  const raw = localStorage.getItem(LS_JOURNAL);
+  if(raw) return JSON.parse(raw);
+  // seed with historical data on first run
+  const seed = [
+    {id:1, date:"2026-07-06", exercise:"Подтягивания", sets:[2,2,1,0], notes:"надо начинать треню с этого"},
+    {id:2, date:"2026-07-06", exercise:"Отжимания классические", sets:[14,9,8,6], notes:""},
+    {id:3, date:"2026-07-06", exercise:"Обратные отжимания (скамья/стул)", sets:[9,9,8,6], notes:""},
+    {id:4, date:"2026-07-06", exercise:"Планка", sets:[60,40,30,20], notes:""},
+    {id:5, date:"2026-07-07", exercise:"Приседания", sets:[20,20,18,15], notes:""},
+    {id:6, date:"2026-07-07", exercise:"Пресс (подъём на 90°)", sets:[15,15,8,7], notes:""},
+    {id:7, date:"2026-07-07", exercise:"Скручивания пресса", sets:[20,18,17,17], notes:"Исправить технику"},
+  ];
+  localStorage.setItem(LS_JOURNAL, JSON.stringify(seed));
+  return seed;
+}
+function saveJournalLocal(data){ localStorage.setItem(LS_JOURNAL, JSON.stringify(data)); }
+function saveJournal(data){
+  saveJournalLocal(data);
+  localStorage.setItem('zt_local_updated', String(Date.now()));
+  if(typeof pushToCloud==='function') pushToCloud();
+}
+
+// ---------------------------------------------------------------------
+// Navigation
+// ---------------------------------------------------------------------
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+    if(btn.dataset.page==='dashboard') renderDashboard();
+    closeNav();
+  });
+});
+
+function toggleNav(){
+  document.getElementById('mainNav').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeNav(){
+  document.getElementById('mainNav').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ---------------------------------------------------------------------
+// KBJU calculator
+// ---------------------------------------------------------------------
+const kbjuIds = ['inWeight','inHeight','inAge','inActivity','inSurplus','inProtein','inFatPct'];
+function calcKbju(){
+  const w = parseFloat(document.getElementById('inWeight').value)||0;
+  const h = parseFloat(document.getElementById('inHeight').value)||0;
+  const age = parseFloat(document.getElementById('inAge').value)||0;
+  const act = parseFloat(document.getElementById('inActivity').value)||1.2;
+  const surplus = parseFloat(document.getElementById('inSurplus').value)||0;
+  const proteinPerKg = parseFloat(document.getElementById('inProtein').value)||0;
+  const fatPct = (parseFloat(document.getElementById('inFatPct').value)||0)/100;
+
+  const bmr = 10*w + 6.25*h - 5*age + 5;
+  const tdee = bmr*act;
+  const target = tdee + surplus;
+  const proteinG = w*proteinPerKg;
+  const proteinKcal = proteinG*4;
+  const fatKcal = target*fatPct;
+  const fatG = fatKcal/9;
+  const carbKcal = target - proteinKcal - fatKcal;
+  const carbG = carbKcal/4;
+
+  document.getElementById('outBmr').textContent = Math.round(bmr)+" ккал";
+  document.getElementById('outTdee').textContent = Math.round(tdee)+" ккал";
+  document.getElementById('outTarget').textContent = Math.round(target)+" ккал";
+  document.getElementById('outProteinG').textContent = Math.round(proteinG)+" г";
+  document.getElementById('outFatG').textContent = Math.round(fatG)+" г";
+  document.getElementById('outCarbG').textContent = Math.round(carbG)+" г";
+
+  saveKbju({weight:w,height:h,age,activity:act,surplus,proteinPerKg,fatPct:fatPct*100});
+}
+kbjuIds.forEach(id=>document.getElementById(id).addEventListener('input', calcKbju));
+
+function initKbju(){
+  const saved = loadKbju();
+  if(saved){
+    document.getElementById('inWeight').value = saved.weight;
+    document.getElementById('inHeight').value = saved.height;
+    document.getElementById('inAge').value = saved.age;
+    document.getElementById('inActivity').value = saved.activity;
+    document.getElementById('inSurplus').value = saved.surplus;
+    document.getElementById('inProtein').value = saved.proteinPerKg;
+    document.getElementById('inFatPct').value = saved.fatPct;
+  }
+  calcKbju();
+}
+
+// ---------------------------------------------------------------------
+// Schedule page
+// ---------------------------------------------------------------------
+function renderSchedule(){
+  const el = document.getElementById('scheduleContent');
+  el.innerHTML = SCHEDULE.map(d=>{
+    const [label, cls] = WHERE_LABEL[d.place] || ["Отдых","rest"];
+    return `<div class="day-block card">
+      <div class="day-head"><span class="dname">${d.day}</span><span class="tag ${cls}">${label}</span></div>
+      ${d.circles.map(c=>`
+        <div class="circle-label">${c.label}</div>
+        <div>${c.ex}</div>
+        <div class="note">${c.sets} — ${c.muscles}</div>
+      `).join('')}
+    </div>`;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------
+// Reference page
+// ---------------------------------------------------------------------
+function targetVolume(e){ return e.sets*e.max; }
+function targetLabel(e){
+  const suffix = e.unit.includes('на ногу') ? '(на ногу)' : e.unit.includes('на руку') ? '(на руку)' : e.unit;
+  return `${e.sets}×${e.min}-${e.max} ${suffix}`;
+}
+function renderReference(){
+  const tbody = document.getElementById('refTable');
+  tbody.innerHTML = EXERCISES.map(e=>{
+    const [label, cls] = WHERE_LABEL[e.where];
+    return `<tr>
+      <td><b>${e.name}</b></td>
+      <td><span class="tag ${cls}">${label}</span></td>
+      <td class="mono">${targetLabel(e)}</td>
+      <td class="tech-note">${e.tech}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------
+// Journal page
+// ---------------------------------------------------------------------
+function initJournalForm(){
+  const sel = document.getElementById('jExercise');
+  sel.innerHTML = EXERCISES.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
+  const filterSel = document.getElementById('filterExercise');
+  filterSel.innerHTML += EXERCISES.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
+  document.getElementById('jDate').value = new Date().toISOString().slice(0,10);
+}
+
+function addEntry(){
+  const date = document.getElementById('jDate').value;
+  const exercise = document.getElementById('jExercise').value;
+  const s1 = parseInt(document.getElementById('jS1').value)||0;
+  const s2 = parseInt(document.getElementById('jS2').value)||0;
+  const s3 = parseInt(document.getElementById('jS3').value)||0;
+  const s4 = parseInt(document.getElementById('jS4').value)||0;
+  const notes = document.getElementById('jNotes').value;
+  if(!date){ alert('Укажи дату'); return; }
+
+  const journal = loadJournal();
+  const id = journal.length ? Math.max(...journal.map(j=>j.id))+1 : 1;
+  journal.push({id, date, exercise, sets:[s1,s2,s3,s4], notes});
+  saveJournal(journal);
+
+  document.getElementById('jS1').value='';
+  document.getElementById('jS2').value='';
+  document.getElementById('jS3').value='';
+  document.getElementById('jS4').value='';
+  document.getElementById('jNotes').value='';
+
+  renderJournalList();
+  renderDashboard();
+}
+
+function deleteEntry(id){
+  let journal = loadJournal();
+  journal = journal.filter(j=>j.id!==id);
+  saveJournal(journal);
+  renderJournalList();
+  renderDashboard();
+}
+
+function weekdayName(dateStr){
+  const days = ["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+  return days[new Date(dateStr+"T00:00:00").getDay()];
+}
+
+function renderJournalList(){
+  const journal = loadJournal().slice().sort((a,b)=> a.date < b.date ? 1 : -1);
+  const filter = document.getElementById('filterExercise').value;
+  const filtered = filter ? journal.filter(j=>j.exercise===filter) : journal;
+  const el = document.getElementById('journalList');
+  el.innerHTML = filtered.map(j=>{
+    const total = j.sets.reduce((a,b)=>a+b,0);
+    return `<div class="journal-row">
+      <div>${j.date}</div>
+      <div>${weekdayName(j.date)}</div>
+      <div>${j.exercise}</div>
+      <div class="mono">${j.sets[0]||''}</div>
+      <div class="mono">${j.sets[1]||''}</div>
+      <div class="mono">${j.sets[2]||''}</div>
+      <div class="mono">${j.sets[3]||''}</div>
+      <div class="mono">${total}</div>
+      <div>${j.notes||''}</div>
+      <div class="del" onclick="deleteEntry(${j.id})">✕</div>
+    </div>`;
+  }).join('') || '<div class="note">Пока нет записей</div>';
+}
+
+// ---------------------------------------------------------------------
+// Dashboard / stats
+// ---------------------------------------------------------------------
+function renderDashboard(){
+  const journal = loadJournal();
+  const dates = journal.map(j=>j.date).filter(Boolean).sort();
+  const startDate = dates.length ? dates[0] : new Date().toISOString().slice(0,10);
+  const today = new Date().toISOString().slice(0,10);
+  const weekNum = Math.floor((new Date(today) - new Date(startDate))/(7*86400000)) + 1;
+
+  document.getElementById('dbWeek').textContent = weekNum;
+  document.getElementById('dbSessions').textContent = journal.length;
+  document.getElementById('dbStart').textContent = startDate.split('-').reverse().join('.');
+  document.getElementById('dbToday').textContent = today.split('-').reverse().join('.');
+
+  // weekly volume chart
+  const weekTotals = {};
+  journal.forEach(j=>{
+    const wk = Math.floor((new Date(j.date) - new Date(startDate))/(7*86400000)) + 1;
+    const total = j.sets.reduce((a,b)=>a+b,0);
+    weekTotals[wk] = (weekTotals[wk]||0) + total;
+  });
+  const maxWeek = Math.max(1, ...Object.keys(weekTotals).map(Number));
+  const maxVal = Math.max(1, ...Object.values(weekTotals));
+  const chartEl = document.getElementById('weekChart');
+  let bars = '';
+  for(let w=1; w<=Math.max(maxWeek,4); w++){
+    const val = weekTotals[w]||0;
+    const h = Math.round((val/maxVal)*100);
+    bars += `<div class="bar" style="height:${h}%"><span>Н${w}</span></div>`;
+  }
+  chartEl.innerHTML = bars;
+
+  // per-exercise stats
+  const statEl = document.getElementById('statList');
+  statEl.innerHTML = EXERCISES.map(e=>{
+    const entries = journal.filter(j=>j.exercise===e.name && j.sets.reduce((a,b)=>a+b,0)>0)
+                            .sort((a,b)=> a.date < b.date ? -1 : 1);
+    const target = targetVolume(e);
+    if(!entries.length){
+      return `<div class="stat-card">
+        <div class="name">${e.name}</div>
+        <div class="progress-wrap"><div class="progress-gauge"><div class="progress-fill" style="width:0%"></div></div><div class="progress-pct">0%</div></div>
+        <div class="stat-meta"><span>Тренировок: <b>0</b></span><span>Цель: <b>${target}</b></span></div>
+      </div>`;
+    }
+    const totals = entries.map(j=>j.sets.reduce((a,b)=>a+b,0));
+    const last = totals[totals.length-1];
+    const first = totals[0];
+    const best = Math.max(...totals);
+    const avg = Math.round((totals.reduce((a,b)=>a+b,0)/totals.length)*10)/10;
+    const pct = Math.min(1, last/target);
+    const remaining = Math.max(0, target-last);
+    const progress = entries.length>1 ? last-first : null;
+    return `<div class="stat-card">
+      <div class="name">${e.name}</div>
+      <div class="progress-wrap">
+        <div class="progress-gauge"><div class="progress-fill" style="width:${Math.round(pct*100)}%"></div></div>
+        <div class="progress-pct">${Math.round(pct*100)}%</div>
+      </div>
+      <div class="stat-meta">
+        <span>Последний: <b>${last}</b></span>
+        <span>Цель: <b>${target}</b></span>
+        <span>Осталось: <b>${remaining}</b></span>
+        <span>Тренировок: <b>${entries.length}</b></span>
+        <span>Средний: <b>${avg}</b></span>
+        <span>Лучший: <b>${best}</b></span>
+        ${progress!==null ? `<span>С начала: <b>${progress>=0?'+':''}${progress}</b></span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------
+// Cloud sync (Firebase Firestore) — optional, off by default
+// ---------------------------------------------------------------------
+const LS_FB_CONFIG = "zt_fb_config";
+const LS_FB_SYNCCODE = "zt_fb_synccode";
+let fbApp = null, fbDb = null, fbEnabled = false;
+
+function initSync(){
+  const configRaw = localStorage.getItem(LS_FB_CONFIG);
+  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
+  if(!configRaw || !syncCode) return;
+  try{
+    const config = JSON.parse(configRaw);
+    fbApp = firebase.initializeApp(config);
+    fbDb = firebase.firestore();
+    fbEnabled = true;
+    document.getElementById('fbConfig').value = configRaw;
+    document.getElementById('fbSyncCode').value = syncCode;
+    setSyncStatus('подключено: '+syncCode);
+    pullFromCloud(false);
+  }catch(err){
+    console.error('Firebase init error', err);
+    setSyncStatus('ошибка конфигурации');
+  }
+}
+
+function setSyncStatus(text){
+  const el = document.getElementById('syncStatus');
+  if(el) el.textContent = text;
+}
+function setSyncLast(){
+  const el = document.getElementById('syncLast');
+  if(el) el.textContent = new Date().toLocaleTimeString('ru-RU');
+}
+
+function connectSync(){
+  const configRaw = document.getElementById('fbConfig').value.trim();
+  const syncCode = document.getElementById('fbSyncCode').value.trim();
+  if(!configRaw || !syncCode){ alert('Заполни оба поля'); return; }
+  try{
+    JSON.parse(configRaw);
+  }catch(err){ alert('Config должен быть валидным JSON-объектом'); return; }
+
+  localStorage.setItem(LS_FB_CONFIG, configRaw);
+  localStorage.setItem(LS_FB_SYNCCODE, syncCode);
+  location.reload();
+}
+
+function disconnectSync(){
+  if(!confirm('Отключить облако? Данные останутся локально на этом устройстве.')) return;
+  localStorage.removeItem(LS_FB_CONFIG);
+  localStorage.removeItem(LS_FB_SYNCCODE);
+  location.reload();
+}
+
+function pushToCloud(){
+  if(!fbEnabled) return;
+  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
+  const payload = { kbju: loadKbju(), journal: loadJournal(), updatedAt: Date.now() };
+  fbDb.collection('syncData').doc(syncCode).set(payload)
+    .then(()=> setSyncLast())
+    .catch(err=>{ console.error('push error', err); setSyncStatus('ошибка записи в облако'); });
+}
+
+function pullFromCloud(manual){
+  if(!fbEnabled) return;
+  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
+  fbDb.collection('syncData').doc(syncCode).get().then(doc=>{
+    if(doc.exists){
+      const data = doc.data();
+      const localJournal = loadJournal();
+      const localUpdatedAt = parseInt(localStorage.getItem('zt_local_updated')||'0');
+      // cloud wins unless local is strictly newer (simple last-write-wins)
+      if(!data.updatedAt || data.updatedAt >= localUpdatedAt){
+        if(data.kbju) saveKbjuLocal(data.kbju);
+        if(data.journal) saveJournalLocal(data.journal);
+        initKbju();
+        renderJournalList();
+        renderDashboard();
+      }
+      setSyncLast();
+      if(manual) alert('Синхронизировано');
+    } else if(manual){
+      alert('В облаке пока нет данных для этого кода — при следующем изменении данные будут отправлены туда.');
+    }
+  }).catch(err=>{
+    console.error('pull error', err);
+    setSyncStatus('ошибка чтения из облака');
+  });
+}
+
+// ---------------------------------------------------------------------
+// Quick paste parser
+// ---------------------------------------------------------------------
+let pasteParsed = [];
+
+function normalizeStr(s){
+  return s.toLowerCase().replace(/[()«»"']/g,'').replace(/\s+/g,' ').trim();
+}
+
+function guessExercise(rawName){
+  const norm = normalizeStr(rawName);
+  if(!norm) return null;
+  // exact match first
+  let match = EXERCISES.find(e=>normalizeStr(e.name)===norm);
+  if(match) return match.name;
+  // startsWith / includes match
+  match = EXERCISES.find(e=>normalizeStr(e.name).includes(norm) || norm.includes(normalizeStr(e.name)));
+  if(match) return match.name;
+  // word-overlap scoring fallback
+  const words = norm.split(' ').filter(w=>w.length>2);
+  let best = null, bestScore = 0;
+  EXERCISES.forEach(e=>{
+    const eNorm = normalizeStr(e.name);
+    const score = words.filter(w=>eNorm.includes(w)).length;
+    if(score>bestScore){ bestScore = score; best = e.name; }
+  });
+  return bestScore>0 ? best : null;
+}
+
+function parseDateLine(line){
+  const m = line.trim().match(/^(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{2,4}))?\s*$/);
+  if(!m) return null;
+  const day = m[1].padStart(2,'0');
+  const month = m[2].padStart(2,'0');
+  let year = m[3] || String(new Date().getFullYear());
+  if(year.length===2) year = '20'+year;
+  return `${year}-${month}-${day}`;
+}
+
+function parseExerciseLine(line){
+  let notes = '';
+  let text = line;
+  const noteMatch = text.match(/\/\/\s*(.+)$/) || text.match(/\s-\s(.+)$/);
+  if(noteMatch){
+    notes = noteMatch[1].trim();
+    text = text.slice(0, noteMatch.index).trim();
+  }
+  const m = text.match(/^(.*?)[\s:–—-]*([\d]+(?:[\s,x×хXХ]+[\d]+)*)\s*$/);
+  if(!m) return null;
+  const rawName = m[1].trim();
+  const numsBlob = m[2];
+  const nums = numsBlob.split(/[\s,x×хXХ]+/).map(n=>parseInt(n)).filter(n=>!isNaN(n));
+  if(!rawName || nums.length===0) return null;
+  return { rawName, nums, notes };
+}
+
+function parsePaste(){
+  const text = document.getElementById('pasteInput').value;
+  const lines = text.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  let currentDate = new Date().toISOString().slice(0,10);
+  const results = [];
+
+  lines.forEach(line=>{
+    const d = parseDateLine(line);
+    if(d){ currentDate = d; return; }
+    const parsed = parseExerciseLine(line);
+    if(parsed){
+      const matched = guessExercise(parsed.rawName);
+      let sets = parsed.nums.slice(0,4);
+      while(sets.length<4) sets.push('');
+      let extraNote = parsed.notes;
+      if(parsed.nums.length>4){
+        const extra = parsed.nums.slice(4).join(', ');
+        extraNote = (extraNote ? extraNote+'; ' : '') + 'доп. подходы: '+extra;
+      }
+      results.push({
+        date: currentDate,
+        rawName: parsed.rawName,
+        exercise: matched,
+        sets,
+        notes: extraNote,
+        include: true
+      });
+    }
+  });
+
+  pasteParsed = results;
+  renderPastePreview();
+}
+
+function renderPastePreview(){
+  const card = document.getElementById('pastePreviewCard');
+  const el = document.getElementById('pastePreview');
+  if(!pasteParsed.length){
+    card.style.display='block';
+    el.innerHTML = '<div class="note">Не удалось распознать ни одной строки. Проверь формат выше.</div>';
+    return;
+  }
+  card.style.display='block';
+  el.innerHTML = pasteParsed.map((p,i)=>{
+    const options = EXERCISES.map(e=>`<option value="${e.name}" ${e.name===p.exercise?'selected':''}>${e.name}</option>`).join('');
+    const unmatchedFlag = !p.exercise ? '<span style="color:var(--danger);font-size:10px;">не распознано — выбери вручную</span>' : '';
+    return `<div class="stat-card">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+        <input type="checkbox" ${p.include?'checked':''} onchange="pasteParsed[${i}].include=this.checked">
+        <input type="date" value="${p.date}" style="background:var(--surface);border:1px solid var(--line);color:var(--text);
+          padding:5px 8px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+          onchange="pasteParsed[${i}].date=this.value">
+        <select style="background:var(--surface);border:1px solid var(--line);color:var(--text);padding:5px 8px;
+          border-radius:5px;font-size:12px;flex:1;" onchange="pasteParsed[${i}].exercise=this.value">
+          ${options}
+        </select>
+        ${unmatchedFlag}
+      </div>
+      <div style="display:flex;gap:6px;">
+        ${[0,1,2,3].map(si=>`<input type="number" value="${p.sets[si]}" style="width:56px;background:var(--surface);
+          border:1px solid var(--line);color:var(--text);padding:5px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+          onchange="pasteParsed[${i}].sets[${si}]=this.value">`).join('')}
+        <input type="text" value="${p.notes||''}" placeholder="заметка" style="flex:1;background:var(--surface);
+          border:1px solid var(--line);color:var(--text);padding:5px 8px;border-radius:5px;font-size:12px;"
+          onchange="pasteParsed[${i}].notes=this.value">
+      </div>
+      <div class="note" style="margin-top:6px;">исходная строка: «${p.rawName}»</div>
+    </div>`;
+  }).join('');
+}
+
+function commitPaste(){
+  const toAdd = pasteParsed.filter(p=>p.include && p.exercise && p.date);
+  if(!toAdd.length){ alert('Нечего добавлять — отметь строки и убедись, что упражнение и дата указаны'); return; }
+  const journal = loadJournal();
+  let nextId = journal.length ? Math.max(...journal.map(j=>j.id))+1 : 1;
+  toAdd.forEach(p=>{
+    const sets = p.sets.map(s=>parseInt(s)||0);
+    journal.push({ id: nextId++, date: p.date, exercise: p.exercise, sets, notes: p.notes||'' });
+  });
+  saveJournal(journal);
+  pasteParsed = [];
+  document.getElementById('pastePreviewCard').style.display='none';
+  document.getElementById('pasteInput').value='';
+  renderJournalList();
+  renderDashboard();
+  alert(`Добавлено записей: ${toAdd.length}`);
+}
+
+// ---------------------------------------------------------------------
+// Export / Import
+// ---------------------------------------------------------------------
+function exportData(){
+  const data = { kbju: loadKbju(), journal: loadJournal() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'trening_data_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+function importData(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const data = JSON.parse(e.target.result);
+      if(data.kbju) saveKbju(data.kbju);
+      if(data.journal) saveJournal(data.journal);
+      initKbju();
+      renderJournalList();
+      renderDashboard();
+      alert('Данные импортированы');
+    }catch(err){ alert('Не удалось прочитать файл'); }
+  };
+  reader.readAsText(file);
+}
+
+// ---------------------------------------------------------------------
+// Init
+// ---------------------------------------------------------------------
+initKbju();
+renderSchedule();
+renderReference();
+initJournalForm();
+renderJournalList();
+renderDashboard();
+initSync();
+</script>
+</body>
+</html>
