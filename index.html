@@ -22,6 +22,10 @@
   --radius:10px;
 }
 *{box-sizing:border-box;}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+input[type=number]{-moz-appearance:textfield;appearance:textfield;}
+html,body{overflow-x:hidden;max-width:100%;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;}
 h1,h2,h3,.disp{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.03em;}
 .mono{font-family:'IBM Plex Mono',monospace;}
@@ -35,7 +39,7 @@ nav button{display:block;width:100%;text-align:left;background:none;border:none;
   padding:12px 20px;cursor:pointer;border-left:3px solid transparent;transition:.15s;}
 nav button:hover{color:var(--text);background:var(--surface2);}
 nav button.active{color:var(--accent);border-left-color:var(--accent);background:var(--surface2);}
-main{flex:1;padding:32px 40px;max-width:1100px;}
+main{flex:1;padding:32px 40px;max-width:1100px;min-width:0;overflow-x:hidden;}
 .page{display:none;}
 .page.active{display:block;animation:fade .25s ease;}
 @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -46,9 +50,9 @@ h1.page-title{font-size:26px;margin:0 0 4px;color:var(--text);}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;}
-.field input,.field select{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);
   padding:9px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:14px;}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
 .result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px;}
 .result-row:last-child{border-bottom:none;}
 .result-row .val{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--accent);}
@@ -72,12 +76,14 @@ tr:last-child td{border-bottom:none;}
 .btn:hover{filter:brightness(1.08);}
 .btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
 .btn.danger{background:var(--danger);color:#fff;}
+.btn.small{padding:5px 12px;font-size:11px;}
 .entry-form{display:grid;grid-template-columns:130px 1fr 70px 70px 70px 70px 1fr auto;gap:8px;align-items:end;}
 .entry-form .field{margin:0;}
 .journal-row{display:grid;grid-template-columns:100px 110px 1fr 60px 60px 60px 60px 60px 1fr 30px;gap:8px;align-items:center;
   padding:7px 0;border-bottom:1px solid var(--line);font-size:12px;}
 .journal-row.head{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.03em;font-weight:600;}
 .journal-row .del{color:var(--danger);cursor:pointer;text-align:center;}
+.journal-table-wrap{overflow-x:auto;}
 .filter-bar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
 .filter-bar select{background:var(--surface2);border:1px solid var(--line);color:var(--text);padding:7px 10px;border-radius:6px;font-size:13px;}
 .progress-wrap{display:flex;align-items:center;gap:10px;}
@@ -97,8 +103,15 @@ tr:last-child td{border-bottom:none;}
 .chart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent-dim));border-radius:3px 3px 0 0;position:relative;min-height:2px;}
 .chart .bar span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:9px;color:var(--muted);}
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;}
-.export-bar{display:flex;gap:10px;margin-top:20px;}
+.export-bar{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
 .tech-note{font-size:12px;color:var(--muted);line-height:1.5;}
+.dish-row{display:grid;grid-template-columns:1fr 90px 150px 90px auto;gap:8px;align-items:center;margin-bottom:8px;}
+.dish-row select,.dish-row input{background:var(--surface);border:1px solid var(--line);color:var(--text);
+  padding:7px 8px;border-radius:6px;font-size:12px;}
+.dish-card{background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:12px;}
+.dish-card .name{font-family:'Oswald',sans-serif;font-size:16px;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.pill-row{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);}
+.pill-row b{color:var(--text);font-family:'IBM Plex Mono',monospace;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
 
@@ -140,8 +153,8 @@ tr:last-child td{border-bottom:none;}
   .top-stats{grid-template-columns:repeat(2,1fr);}
   .entry-form{grid-template-columns:1fr 1fr;}
   .entry-form .btn{grid-column:1 / -1;}
-  .journal-table-wrap{overflow-x:auto;}
   .journal-row,.journal-row.head{min-width:640px;}
+  .dish-row{grid-template-columns:1fr;}
   h1.page-title{font-size:21px;}
 }
 </style>
@@ -159,12 +172,11 @@ tr:last-child td{border-bottom:none;}
       <div class="sub">трекер / калькулятор</div>
     </div>
     <button data-page="dashboard" class="active">Дашборд</button>
-    <button data-page="kbju">КБЖУ</button>
+    <button data-page="nutrition">Питание</button>
+    <button data-page="settings">Настройки</button>
     <button data-page="schedule">График</button>
     <button data-page="reference">Справочник</button>
     <button data-page="journal">Журнал</button>
-    <button data-page="quickpaste">Быстрый ввод</button>
-    <button data-page="settings">Настройки / Синк</button>
   </nav>
   <main>
 
@@ -180,86 +192,233 @@ tr:last-child td{border-bottom:none;}
       </div>
 
       <div class="card">
-        <h2>Объём тренировок по неделям</h2>
+        <h2>Динамика</h2>
+        <div class="filter-bar">
+          <select id="chartType" onchange="renderDashboard()">
+            <option value="volume">Объём по неделям</option>
+            <option value="sessions">Тренировок в неделю</option>
+            <option value="variety">Разных упражнений в неделю</option>
+            <option value="progress">Средний % выполнения цели по неделям</option>
+          </select>
+        </div>
         <div class="chart" id="weekChart"></div>
       </div>
 
       <div class="card">
         <h2>Прогресс по упражнениям</h2>
+        <div class="filter-bar">
+          <select id="progressStyle" onchange="renderDashboard()">
+            <option value="bar">Полоска</option>
+            <option value="ring">Круг</option>
+            <option value="spark">График (по тренировкам)</option>
+            <option value="dots">Точки (по тренировкам)</option>
+          </select>
+        </div>
         <div id="statList"></div>
       </div>
     </section>
 
-    <!-- KBJU -->
-    <section class="page" id="page-kbju">
-      <h1 class="page-title">Расчёт КБЖУ</h1>
-      <div class="page-sub">Формула Mifflin-St Jeor, набор массы</div>
-      <div class="grid2">
-        <div class="card">
-          <h2>Исходные данные</h2>
-          <div class="field"><label>Вес, кг</label><input type="number" id="inWeight" value="75"></div>
-          <div class="field"><label>Рост, см</label><input type="number" id="inHeight" value="185"></div>
-          <div class="field"><label>Возраст, лет</label><input type="number" id="inAge" value="25"></div>
-          <div class="field"><label>Активность</label>
-            <select id="inActivity">
-              <option value="1.2">Малоподвижный</option>
-              <option value="1.375">Лёгкая активность</option>
-              <option value="1.55" selected>Умеренная (4-5 трен/нед)</option>
-              <option value="1.725">Высокая</option>
-            </select>
+    <!-- NUTRITION -->
+    <section class="page" id="page-nutrition">
+      <h1 class="page-title">Питание</h1>
+      <div class="page-sub">Результаты по КБЖУ и блюда</div>
+
+      <div class="card">
+        <h2>Автоподбор рациона на день</h2>
+        <div class="note">
+          Подбирает блюда из «Наших блюд» так, чтобы уложиться в КБЖУ, не повторять то, что ели вчера/позавчера,
+          учитывать бюджет и любимые блюда. Каждый раз результат немного разный — жми «Пересобрать» у конкретного приёма,
+          если не нравится вариант.
+        </div>
+        <div style="margin-top:12px;"><button class="btn" onclick="buildDayPlan()">Собрать день</button></div>
+        <div id="dayPlanWrap" style="margin-top:16px;"></div>
+      </div>
+
+      <div class="card">
+        <h2>Результаты</h2>
+        <div class="result-row"><span>BMR (базовый обмен)</span><span class="val" id="outBmr">—</span></div>
+        <div class="result-row"><span>TDEE (общий расход)</span><span class="val" id="outTdee">—</span></div>
+        <div class="result-row big"><span>Целевая калорийность</span><span class="val" id="outTarget">—</span></div>
+        <div class="result-row"><span>Белок</span><span class="val" id="outProteinG">—</span></div>
+        <div class="result-row"><span>Жиры</span><span class="val" id="outFatG">—</span></div>
+        <div class="result-row"><span>Углеводы</span><span class="val" id="outCarbG">—</span></div>
+        <div class="note">Параметры (вес, возраст, профицит и т.д.) редактируются на вкладке «Настройки».</div>
+      </div>
+
+      <div class="card">
+        <h2>Наши блюда</h2>
+        <button class="btn secondary small" onclick="toggleDishBlock()" id="dishToggleBtn">Показать наши блюда</button>
+        <div id="dishBlock" style="display:none;margin-top:16px;">
+          <div id="dishList"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Конструктор блюд</h2>
+        <button class="btn secondary small" onclick="toggleIngredientBlock()" id="ingToggleBtn">Показать список ингредиентов</button>
+
+        <div id="ingredientBlock" style="display:none;margin-top:16px;">
+          <table>
+            <thead><tr><th>Название</th><th>Ккал/100г</th><th>Белки</th><th>Жиры</th><th>Углеводы</th><th>Цена/100г</th><th></th></tr></thead>
+            <tbody id="ingredientTable"></tbody>
+          </table>
+          <div class="note" style="margin-top:10px;">Добавь свой ингредиент, если его нет в списке:</div>
+          <div class="dish-row" style="grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr auto;margin-top:8px;">
+            <input type="text" id="newIngName" placeholder="Название">
+            <input type="number" id="newIngKcal" placeholder="Ккал/100г">
+            <input type="number" id="newIngProtein" placeholder="Белки/100г">
+            <input type="number" id="newIngFat" placeholder="Жиры/100г">
+            <input type="number" id="newIngCarb" placeholder="Углеводы/100г">
+            <input type="number" id="newIngPrice" placeholder="Цена/100г">
+            <button class="btn small" onclick="addIngredient()">Добавить</button>
           </div>
-          <div class="field"><label>Профицит калорий, ккал</label><input type="number" id="inSurplus" value="400"></div>
-          <div class="field"><label>Белок, г/кг</label><input type="number" step="0.1" id="inProtein" value="2.0"></div>
-          <div class="field"><label>Жиры, % от калорий</label><input type="number" id="inFatPct" value="22"></div>
         </div>
-        <div class="card">
-          <h2>Результат</h2>
-          <div class="result-row"><span>BMR (базовый обмен)</span><span class="val" id="outBmr">—</span></div>
-          <div class="result-row"><span>TDEE (общий расход)</span><span class="val" id="outTdee">—</span></div>
-          <div class="result-row big"><span>Целевая калорийность</span><span class="val" id="outTarget">—</span></div>
-          <div class="result-row"><span>Белок</span><span class="val" id="outProteinG">—</span></div>
-          <div class="result-row"><span>Жиры</span><span class="val" id="outFatG">—</span></div>
-          <div class="result-row"><span>Углеводы</span><span class="val" id="outCarbG">—</span></div>
-          <div class="note">Пересчитывается сразу при изменении любого поля. Данные сохраняются в браузере.</div>
+
+        <div class="field" style="margin-top:16px;"><label>Название блюда</label><input type="text" id="dishName" placeholder="например: Гречка с сосиской"></div>
+        <div class="field"><label>Теги через запятую (для папок в «Наших блюдах»)</label><input type="text" id="dishTags" placeholder="завтрак, быстро"></div>
+        <div id="dishRows"></div>
+        <button class="btn secondary small" onclick="addDishRow()">+ Добавить ингредиент</button>
+
+        <div class="stat-card" style="margin-top:16px;">
+          <div class="pill-row">
+            <span>Вес сырых продуктов: <b id="dishRawWeight">0 г</b></span>
+            <span>Вес готового блюда: <b id="dishCookedWeight">0 г</b></span>
+            <span>Ккал: <b id="dishKcal">0</b></span>
+            <span>Белки: <b id="dishProtein">0 г</b></span>
+            <span>Жиры: <b id="dishFat">0 г</b></span>
+            <span>Углеводы: <b id="dishCarb">0 г</b></span>
+            <span>Цена (авто): <b id="dishPriceAuto">0</b></span>
+          </div>
         </div>
+        <div class="field" style="margin-top:12px;"><label>Итоговая цена блюда (можно поправить вручную)</label>
+          <input type="number" id="dishPriceOverride" placeholder="оставь пустым для автоцены"></div>
+        <button class="btn" onclick="saveDish()">Сохранить блюдо</button>
+      </div>
+    </section>
+
+    <!-- PERSONAL SETTINGS -->
+    <section class="page" id="page-settings">
+      <h1 class="page-title">Персональные настройки</h1>
+      <div class="page-sub">Параметры для расчёта КБЖУ (набор массы)</div>
+      <div class="card">
+        <div class="field"><label>Вес, кг</label><input type="number" id="inWeight" value="75"></div>
+        <div class="field"><label>Рост, см</label><input type="number" id="inHeight" value="185"></div>
+        <div class="field"><label>Возраст, лет</label><input type="number" id="inAge" value="25"></div>
+        <div class="field"><label>Активность</label>
+          <select id="inActivity">
+            <option value="1.2">Малоподвижный</option>
+            <option value="1.375">Лёгкая активность</option>
+            <option value="1.55" selected>Умеренная (4-5 трен/нед)</option>
+            <option value="1.725">Высокая</option>
+          </select>
+        </div>
+        <div class="field"><label>Профицит калорий, ккал</label><input type="number" id="inSurplus" value="400"></div>
+        <div class="field"><label>Белок, г/кг</label><input type="number" step="0.1" id="inProtein" value="2.0"></div>
+        <div class="field"><label>Жиры, % от калорий</label><input type="number" id="inFatPct" value="22"></div>
+        <div class="note">Изменения сразу пересчитывают результаты на вкладке «Питание».</div>
       </div>
     </section>
 
     <!-- SCHEDULE -->
     <section class="page" id="page-schedule">
       <h1 class="page-title">Недельный график</h1>
-      <div class="page-sub">Суперсет = пара упражнений на противоположные группы мышц. Подход первого → 15-30 сек → подход второго → отдых 60-90 сек → повтор круга.</div>
+      <div class="page-sub" id="scheduleSubtitle">Суперсет = пара упражнений на противоположные группы мышц. Подход первого → 15-30 сек → подход второго → отдых 60-90 сек → повтор круга.</div>
+
+      <div class="card">
+        <h2>Профили</h2>
+        <div class="note">Профиль хранит свой формат тренировок, локацию и любимую группу мышц — свой график для каждого профиля.</div>
+        <div id="profileTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;"></div>
+        <button class="btn secondary small" onclick="addProfile()">+ Новый профиль</button>
+
+        <div id="profileSettings" style="margin-top:16px;"></div>
+      </div>
+
       <div id="scheduleContent"></div>
     </section>
 
     <!-- REFERENCE -->
     <section class="page" id="page-reference">
       <h1 class="page-title">Справочник упражнений</h1>
-      <div class="page-sub">Целевые диапазоны и техника выполнения</div>
+      <div class="page-sub">Целевые диапазоны, группы мышц и техника выполнения</div>
+
       <div class="card">
-        <table>
-          <thead><tr><th>Упражнение</th><th>Где</th><th>Цель</th><th>Техника</th></tr></thead>
-          <tbody id="refTable"></tbody>
-        </table>
+        <button class="btn secondary small" onclick="toggleAddExerciseBlock()" id="addExToggleBtn">+ Добавить своё упражнение</button>
+        <div id="addExerciseBlock" style="display:none;margin-top:16px;">
+          <div class="field"><label>Название</label><input type="text" id="newExName" placeholder="например: Отжимания на кулаках"></div>
+          <div class="grid2">
+            <div class="field"><label>Подходы</label><input type="number" id="newExSets" value="3"></div>
+            <div class="field"><label>Мин. в подходе</label><input type="number" id="newExMin" value="10"></div>
+            <div class="field"><label>Макс. в подходе</label><input type="number" id="newExMax" value="15"></div>
+            <div class="field"><label>Финальная цель</label><input type="number" id="newExFinal" value="30"></div>
+            <div class="field"><label>Ед. измерения</label>
+              <select id="newExUnit">
+                <option value="повторений">повторений</option>
+                <option value="повторений на ногу">повторений на ногу</option>
+                <option value="повторений на руку">повторений на руку</option>
+                <option value="секунд">секунд</option>
+                <option value="минут">минут</option>
+                <option value="интервалов">интервалов</option>
+              </select>
+            </div>
+            <div class="field"><label>Где делать</label>
+              <select id="newExWhere">
+                <option value="both">Дом / Улица</option>
+                <option value="home">Дом</option>
+                <option value="outside">Улица</option>
+              </select>
+            </div>
+            <div class="field"><label>Группа мышц</label>
+              <select id="newExMuscle">
+                <option>Грудь</option><option>Спина</option><option>Плечи</option>
+                <option>Руки</option><option>Ноги</option><option>Кор</option><option>Кардио</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label>Техника выполнения</label><textarea id="newExTech" rows="2" placeholder="как делать правильно"></textarea></div>
+          <button class="btn" onclick="addExercise()">Добавить упражнение</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="field"><input type="text" id="refSearch" placeholder="Поиск по названию упражнения..." oninput="renderReference()"></div>
+        <div id="refList"></div>
       </div>
     </section>
 
     <!-- JOURNAL -->
     <section class="page" id="page-journal">
       <h1 class="page-title">Журнал тренировок</h1>
-      <div class="page-sub">Добавляй результат после каждой тренировки</div>
+      <div class="page-sub">Добавляй результат после каждой тренировки — вручную или вставкой текста</div>
 
       <div class="card">
-        <h2>Новая запись</h2>
-        <div class="entry-form">
-          <div class="field"><label>Дата</label><input type="date" id="jDate"></div>
-          <div class="field"><label>Упражнение</label><select id="jExercise"></select></div>
-          <div class="field"><label>П1</label><input type="number" id="jS1"></div>
-          <div class="field"><label>П2</label><input type="number" id="jS2"></div>
-          <div class="field"><label>П3</label><input type="number" id="jS3"></div>
-          <div class="field"><label>П4</label><input type="number" id="jS4"></div>
-          <div class="field"><label>Заметки</label><input type="text" id="jNotes"></div>
-          <button class="btn" onclick="addEntry()">Добавить</button>
+        <button class="btn" onclick="toggleAddEntryBlock()" id="addEntryToggleBtn">+ Добавить тренировку</button>
+        <div id="addEntryBlock" style="display:none;margin-top:16px;">
+          <div class="entry-form">
+            <div class="field"><label>Дата</label><input type="date" id="jDate"></div>
+            <div class="field"><label>Упражнение</label><select id="jExercise"></select></div>
+            <div class="field"><label>П1</label><input type="number" id="jS1"></div>
+            <div class="field"><label>П2</label><input type="number" id="jS2"></div>
+            <div class="field"><label>П3</label><input type="number" id="jS3"></div>
+            <div class="field"><label>П4</label><input type="number" id="jS4"></div>
+            <div class="field"><label>Заметки</label><input type="text" id="jNotes"></div>
+            <button class="btn" onclick="addEntry()">Добавить</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Быстрый ввод (вставка из заметок)</h2>
+        <div class="tech-note">
+          Дата на отдельной строке: <b>06.07</b> или <b>06.07.2026</b>. Дальше упражнения, каждое на своей строке:
+          <b>Название 14 9 8 6</b>. Заметку можно добавить через " - " или "//" в конце строки.
+        </div>
+        <textarea id="pasteInput" rows="8" style="width:100%;margin-top:10px;background:var(--surface2);border:1px solid var(--line);
+          color:var(--text);padding:12px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;"
+          placeholder="06.07&#10;Отжимания классические 14 9 8 6&#10;Планка 60 40 30 20 // тяжело"></textarea>
+        <div style="margin-top:12px;"><button class="btn secondary" onclick="parsePaste()">Разобрать</button></div>
+        <div id="pastePreviewWrap" style="display:none;margin-top:16px;">
+          <div id="pastePreview"></div>
+          <button class="btn" style="margin-top:10px;" onclick="commitPaste()">Добавить отмеченные в журнал</button>
         </div>
       </div>
 
@@ -283,122 +442,142 @@ tr:last-child td{border-bottom:none;}
       </div>
     </section>
 
-    <!-- QUICK PASTE -->
-    <section class="page" id="page-quickpaste">
-      <h1 class="page-title">Быстрый ввод</h1>
-      <div class="page-sub">Вставь текст из заметок — приложение само разберёт даты, упражнения и подходы</div>
-
-      <div class="card">
-        <h2>Формат (пиши примерно так)</h2>
-        <div class="tech-note">
-          Дата на отдельной строке: <b>06.07</b> или <b>06.07.2026</b><br>
-          Дальше упражнения, каждое на своей строке: <b>Название 14 9 8 6</b><br>
-          Заметку можно добавить через " - " или "//" в конце: <b>Планка 60 40 30 20 // тяжело</b><br>
-          Числа можно разделять пробелом, запятой или "x". Название не обязано быть точным — сопоставим сами.
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Вставь текст</h2>
-        <textarea id="pasteInput" rows="10" style="width:100%;background:var(--surface2);border:1px solid var(--line);
-          color:var(--text);padding:12px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:13px;"
-          placeholder="06.07&#10;Отжимания классические 14 9 8 6&#10;Обратные отжимания 9 9 8 6&#10;Планка 60 40 30 20 // тяжело&#10;&#10;07.07&#10;Приседания 20 20 18 15"></textarea>
-        <div style="margin-top:12px;">
-          <button class="btn" onclick="parsePaste()">Разобрать</button>
-        </div>
-      </div>
-
-      <div class="card" id="pastePreviewCard" style="display:none;">
-        <h2>Проверь перед добавлением</h2>
-        <div id="pastePreview"></div>
-        <div style="margin-top:14px;">
-          <button class="btn" onclick="commitPaste()">Добавить отмеченные в журнал</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- SETTINGS / SYNC -->
-    <section class="page" id="page-settings">
-      <h1 class="page-title">Настройки и синхронизация</h1>
-      <div class="page-sub">Свяжи телефон и ПК через бесплатное облачное хранилище (Firebase). Без настройки всё работает локально, как раньше.</div>
-
-      <div class="card">
-        <h2>Статус</h2>
-        <div class="result-row"><span>Облако</span><span class="val" id="syncStatus">не настроено</span></div>
-        <div class="result-row"><span>Последняя синхронизация</span><span class="val" id="syncLast">—</span></div>
-      </div>
-
-      <div class="card">
-        <h2>Подключение</h2>
-        <div class="field">
-          <label>Firebase config (вставь весь объект целиком из консоли Firebase)</label>
-          <textarea id="fbConfig" rows="6" style="width:100%;background:var(--surface2);border:1px solid var(--line);
-            color:var(--text);padding:9px 10px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
-            placeholder='{"apiKey": "...", "authDomain": "...", "projectId": "...", ...}'></textarea>
-        </div>
-        <div class="field">
-          <label>Код синхронизации (придумай любой — одинаковый на телефоне и ПК)</label>
-          <input type="text" id="fbSyncCode" placeholder="например: moy-trening-2026">
-        </div>
-        <button class="btn" onclick="connectSync()">Подключить</button>
-        <button class="btn secondary" onclick="pullFromCloud(true)">Синхронизировать сейчас</button>
-        <button class="btn danger" onclick="disconnectSync()">Отключить облако</button>
-        <div class="note" style="margin-top:14px;">
-          Как получить config и код: смотри инструкцию, которую прислал Claude в чате. Коротко — бесплатный проект
-          на console.firebase.google.com → Firestore Database → Project settings → скопировать объект конфигурации веб-приложения.
-        </div>
-      </div>
-    </section>
-
   </main>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
 // ---------------------------------------------------------------------
-// Reference data
+// Reference data — exercises
 // ---------------------------------------------------------------------
-const EXERCISES = [
-  {name:"Отжимания классические", sets:3, min:15, max:20, unit:"повторений", where:"both",
+const DEFAULT_EXERCISES = [
+  {name:"Отжимания классические", sets:3, min:15, max:20, unit:"повторений", where:"both", muscleGroup:"Грудь",
    tech:"Локти ~45° к корпусу, грудь почти касается пола, руки полностью выпрямляются вверху."},
-  {name:"Отжимания широким хватом", sets:3, min:15, max:20, unit:"повторений", where:"both",
+  {name:"Отжимания широким хватом", sets:3, min:15, max:20, unit:"повторений", where:"both", muscleGroup:"Грудь",
    tech:"Руки заметно шире плеч, акцент на растяжение и сведение груди."},
-  {name:"Отжимания с ногами на скамье", sets:3, min:12, max:15, unit:"повторений", where:"outside",
+  {name:"Отжимания с ногами на скамье", sets:3, min:12, max:15, unit:"повторений", where:"outside", muscleGroup:"Грудь",
    tech:"Ноги на скамье, руки на полу. Тело прямая линия, акцент на верх груди/плечи."},
-  {name:"Обратные отжимания (скамья/стул)", sets:3, min:12, max:15, unit:"повторений", where:"both",
+  {name:"Обратные отжимания (скамья/стул)", sets:3, min:12, max:15, unit:"повторений", where:"both", muscleGroup:"Руки",
    tech:"Локти строго назад, плечи не тянутся к ушам, полная амплитуда вниз до угла ~90°."},
-  {name:"Отжимания на брусьях", sets:3, min:8, max:10, unit:"повторений", where:"outside",
+  {name:"Отжимания на брусьях", sets:3, min:8, max:10, unit:"повторений", where:"outside", muscleGroup:"Грудь",
    tech:"Корпус слегка наклонён вперёд (акцент на грудь), локти уходят назад."},
-  {name:"Тяга гантели в наклоне", sets:3, min:12, max:15, unit:"повторений на руку", where:"home",
+  {name:"Тяга гантели в наклоне", sets:3, min:12, max:15, unit:"повторений на руку", where:"home", muscleGroup:"Спина",
    tech:"Наклон корпуса ~45°, спина прямая. Тянуть гантель к поясу, сводя лопатку в верхней точке."},
-  {name:"Жим гантели над головой", sets:3, min:10, max:12, unit:"повторений", where:"home",
+  {name:"Жим гантели над головой", sets:3, min:10, max:12, unit:"повторений", where:"home", muscleGroup:"Плечи",
    tech:"Локоть под кистью, жать строго вверх, не прогибаться в пояснице."},
-  {name:"Подтягивания", sets:4, min:8, max:10, unit:"повторений", where:"outside",
+  {name:"Подтягивания", sets:4, min:8, max:10, unit:"повторений", where:"outside", muscleGroup:"Спина",
    tech:"Без раскачивания корпусом, руки полностью выпрямляются внизу."},
-  {name:"Инверсионная тяга", sets:4, min:12, max:15, unit:"повторений", where:"outside",
+  {name:"Инверсионная тяга", sets:4, min:12, max:15, unit:"повторений", where:"outside", muscleGroup:"Спина",
    tech:"⚠ требует замены — нет подходящей низкой перекладины. Сводить лопатки в конце движения."},
-  {name:"Планка", sets:3, min:90, max:120, unit:"секунд", where:"both",
+  {name:"Планка", sets:3, min:90, max:120, unit:"секунд", where:"both", muscleGroup:"Кор",
    tech:"Тело прямая линия от головы до пяток, таз не провисает и не задирается."},
-  {name:"Пресс (подъём на 90°)", sets:3, min:20, max:25, unit:"повторений", where:"both",
+  {name:"Пресс (подъём на 90°)", sets:3, min:20, max:25, unit:"повторений", where:"both", muscleGroup:"Кор",
    tech:"Поясница прижата к полу, подъём за счёт живота, без рывков руками."},
-  {name:"Скручивания пресса", sets:3, min:25, max:30, unit:"повторений", where:"both",
+  {name:"Скручивания пресса", sets:3, min:25, max:30, unit:"повторений", where:"both", muscleGroup:"Кор",
    tech:"Короткая амплитуда, работа именно от живота."},
-  {name:"Приседания", sets:3, min:20, max:25, unit:"повторений", where:"both",
+  {name:"Приседания", sets:3, min:20, max:25, unit:"повторений", where:"both", muscleGroup:"Ноги",
    tech:"Пятки не отрываются от пола, колени не проваливаются внутрь."},
-  {name:"Выпады назад", sets:3, min:12, max:15, unit:"повторений на ногу", where:"both",
+  {name:"Выпады назад", sets:3, min:12, max:15, unit:"повторений на ногу", where:"both", muscleGroup:"Ноги",
    tech:"Колено передней ноги под ~90°, корпус вертикально."},
-  {name:"Ягодичный мостик", sets:3, min:20, max:25, unit:"повторений", where:"both",
+  {name:"Ягодичный мостик", sets:3, min:20, max:25, unit:"повторений", where:"both", muscleGroup:"Ноги",
    tech:"Сжимать ягодицы в верхней точке, не прогибаться в пояснице."},
-  {name:"Подъёмы на носки", sets:3, min:20, max:25, unit:"повторений", where:"both",
+  {name:"Подъёмы на носки", sets:3, min:20, max:25, unit:"повторений", where:"both", muscleGroup:"Ноги",
    tech:"Полная амплитуда, медленный контролируемый спуск ниже уровня стопы."},
-  {name:"Болгарские сплит-приседания", sets:3, min:10, max:12, unit:"повторений на ногу", where:"both",
-   tech:"Задняя нога на возвышении, колено передней ноги не выходит за носок. Можно с гантелью."},
-  {name:"Бег (равномерный темп)", sets:1, min:25, max:30, unit:"минут", where:"outside",
-   tech:"Цель сейчас — 30 мин непрерывно. Через 2-3 мес — 5 км за 28-30 мин. Тест Купера раз в 6-8 недель."},
-  {name:"Интервалы (спринт/отдых)", sets:1, min:8, max:10, unit:"интервалов", where:"outside",
+  {name:"Болгарские сплит-приседания", sets:3, min:10, max:12, unit:"повторений на ногу", where:"both", muscleGroup:"Ноги",
+   tech:"Задняя нога на возвышении, колено передней ноги не выходит за носок."},
+  {name:"Бег (равномерный темп)", sets:1, min:25, max:30, unit:"минут", where:"outside", muscleGroup:"Кардио",
+   tech:"Цель сейчас — 30 мин непрерывно. Через 2-3 мес — 5 км за 28-30 мин."},
+  {name:"Интервалы (спринт/отдых)", sets:1, min:8, max:10, unit:"интервалов", where:"outside", muscleGroup:"Кардио",
    tech:"Сокращать отдых между спринтами по мере роста формы."},
 ];
+
+const LS_EXERCISES = "zt_exercises";
+const MUSCLE_GROUPS = ["Грудь","Спина","Плечи","Руки","Ноги","Кор","Кардио"];
+
+function loadExercises(){
+  const raw = localStorage.getItem(LS_EXERCISES);
+  if(raw){
+    const saved = JSON.parse(raw);
+    return saved.map(e=>({finalGoal: e.sets*e.max, liked:"none", ...e}));
+  }
+  const seeded = DEFAULT_EXERCISES.map(e=>({...e, finalGoal: e.sets*e.max, liked:"none"}));
+  localStorage.setItem(LS_EXERCISES, JSON.stringify(seeded));
+  return seeded;
+}
+function saveExercises(arr){
+  localStorage.setItem(LS_EXERCISES, JSON.stringify(arr));
+}
+let EXERCISES = loadExercises();
+
+function updateExerciseField(index, field, value){
+  const num = parseInt(value);
+  if(isNaN(num) || num<=0) return;
+  EXERCISES[index][field] = num;
+  saveExercises(EXERCISES);
+  renderReference();
+  renderDashboard();
+}
+
+function updateExerciseMuscle(index, value){
+  EXERCISES[index].muscleGroup = value;
+  saveExercises(EXERCISES);
+}
+
+function updateExerciseWhere(index, value){
+  EXERCISES[index].where = value;
+  saveExercises(EXERCISES);
+  renderReference();
+}
+
+function toggleExerciseLike(index){
+  const order = {none:'liked', liked:'disliked', disliked:'none'};
+  EXERCISES[index].liked = order[EXERCISES[index].liked || 'none'];
+  saveExercises(EXERCISES);
+  renderReference();
+}
+
+function likeLabel(liked){
+  if(liked==='liked') return '★ Нравится';
+  if(liked==='disliked') return '👎 Не нравится';
+  return '☆ Отметить';
+}
+
+function deleteExercise(index){
+  if(!confirm('Удалить упражнение "'+EXERCISES[index].name+'"? Записи в журнале останутся, но упражнение исчезнет из списков.')) return;
+  EXERCISES.splice(index,1);
+  saveExercises(EXERCISES);
+  renderReference();
+  renderDashboard();
+}
+
+function toggleAddExerciseBlock(){
+  const block = document.getElementById('addExerciseBlock');
+  const btn = document.getElementById('addExToggleBtn');
+  const isHidden = block.style.display === 'none';
+  block.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Скрыть форму' : '+ Добавить своё упражнение';
+}
+
+function addExercise(){
+  const name = document.getElementById('newExName').value.trim();
+  if(!name){ alert('Укажи название упражнения'); return; }
+  const sets = parseInt(document.getElementById('newExSets').value)||3;
+  const min = parseInt(document.getElementById('newExMin').value)||10;
+  const max = parseInt(document.getElementById('newExMax').value)||15;
+  const finalGoal = parseInt(document.getElementById('newExFinal').value)||(sets*max);
+  const unit = document.getElementById('newExUnit').value;
+  const where = document.getElementById('newExWhere').value;
+  const muscleGroup = document.getElementById('newExMuscle').value;
+  const tech = document.getElementById('newExTech').value.trim();
+
+  EXERCISES.push({name, sets, min, max, finalGoal, unit, where, muscleGroup, liked:'none', tech});
+  saveExercises(EXERCISES);
+
+  document.getElementById('newExName').value='';
+  document.getElementById('newExTech').value='';
+  toggleAddExerciseBlock();
+  renderReference();
+  renderDashboard();
+}
 
 const WHERE_LABEL = {home:["Дом","home"], outside:["Улица","outside"], both:["Дом / Улица","both"]};
 
@@ -432,26 +611,368 @@ const SCHEDULE = [
 ];
 
 // ---------------------------------------------------------------------
+// Schedule generation: classic split (day = muscle group) and split (day = several
+// muscle groups, dom/outside superset-style) — both scored + rerollable, driven by profiles
+// ---------------------------------------------------------------------
+const CLASSIC_DAYS = [
+  {day:"Понедельник", muscleGroup:"Грудь"},
+  {day:"Вторник", muscleGroup:"Спина"},
+  {day:"Среда", muscleGroup:"Ноги"},
+  {day:"Четверг", muscleGroup:"Плечи"},
+  {day:"Пятница", muscleGroup:"Руки"},
+  {day:"Суббота", muscleGroup:"Кардио"},
+  {day:"Воскресенье", muscleGroup:null},
+];
+const SPLIT_DAYS = [
+  {day:"Понедельник", place:"home", counts:{"Грудь":1,"Спина":2,"Плечи":1,"Кор":1}},
+  {day:"Вторник", place:"home", counts:{"Ноги":3,"Кор":1}},
+  {day:"Среда", place:null, counts:null},
+  {day:"Четверг", place:"outside", counts:{"Спина":2,"Грудь":1,"Плечи":1,"Кор":1}},
+  {day:"Пятница", place:"outside", counts:{"Ноги":3,"Кор":1}},
+  {day:"Суббота", place:"outside", counts:{"Кардио":1,"Кор":1}},
+  {day:"Воскресенье", place:null, counts:null},
+];
+const EXERCISES_PER_DAY = 4;
+let classicPlan = [];
+let splitPlan = [];
+
+function daysSinceExerciseDone(exerciseName, todayStr){
+  const journal = loadJournal().filter(j=>j.exercise===exerciseName && j.date<todayStr
+    && j.sets.reduce((a,b)=>a+b,0)>0);
+  if(!journal.length) return Infinity;
+  const todayDate = new Date(todayStr);
+  const diffs = journal.map(j=>Math.round((todayDate-new Date(j.date))/86400000));
+  return Math.min(...diffs);
+}
+
+function scoreExercise(ex, todayStr, favoriteGroup){
+  let score = 100;
+  const days = daysSinceExerciseDone(ex.name, todayStr);
+  if(days<=2) score -= 30;
+  else if(days>=14) score += 15;
+  if(ex.liked==='liked') score += 20;
+  else if(ex.liked==='disliked') score -= 50;
+  if(favoriteGroup && ex.muscleGroup===favoriteGroup) score += 15;
+  return score;
+}
+
+function weightedPickN(scoredList, n){
+  const pool = scoredList.slice();
+  const picked = [];
+  while(picked.length<n && pool.length){
+    const minScore = Math.min(...pool.map(s=>s.score));
+    const shift = minScore<1 ? (1-minScore) : 0;
+    const weights = pool.map(s=>s.score+shift);
+    const total = weights.reduce((a,b)=>a+b,0);
+    let idx = 0;
+    if(total>0){
+      let r = Math.random()*total;
+      for(let i=0;i<pool.length;i++){ r -= weights[i]; if(r<=0){ idx=i; break; } }
+    } else {
+      idx = Math.floor(Math.random()*pool.length);
+    }
+    picked.push(pool[idx]);
+    pool.splice(idx,1);
+  }
+  return picked;
+}
+
+function locationMatch(exWhere, place){
+  if(!place) return true;
+  return exWhere===place || exWhere==='both';
+}
+
+// ---- Classic ----
+function buildClassicDay(dayIndex, favoriteGroup, place){
+  const dayInfo = CLASSIC_DAYS[dayIndex];
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(!dayInfo.muscleGroup){
+    classicPlan[dayIndex] = {dayInfo, picks: []};
+    return;
+  }
+  const candidates = EXERCISES.filter(e=>e.muscleGroup===dayInfo.muscleGroup && locationMatch(e.where, place));
+  const scored = candidates.map(e=>({ex:e, score:scoreExercise(e, todayStr, favoriteGroup)})).sort((a,b)=>b.score-a.score);
+  const picks = weightedPickN(scored, Math.min(EXERCISES_PER_DAY, scored.length));
+  classicPlan[dayIndex] = {dayInfo, picks};
+}
+function buildClassicWeek(){
+  const p = getActiveProfile();
+  classicPlan = CLASSIC_DAYS.map((d,i)=>{ buildClassicDay(i, p.favoriteGroup, p.place); return classicPlan[i]; });
+  persistActiveProfilePlan();
+  renderSchedule();
+}
+function rerollClassicDay(dayIndex){
+  const p = getActiveProfile();
+  buildClassicDay(dayIndex, p.favoriteGroup, p.place);
+  persistActiveProfilePlan();
+  renderSchedule();
+}
+
+// ---- Split ----
+function buildSplitDay(dayIndex, favoriteGroup){
+  const dayInfo = SPLIT_DAYS[dayIndex];
+  const todayStr = new Date().toISOString().slice(0,10);
+  if(!dayInfo.counts){
+    splitPlan[dayIndex] = {dayInfo, picks: []};
+    return;
+  }
+  const picks = [];
+  Object.keys(dayInfo.counts).forEach(group=>{
+    const n = dayInfo.counts[group];
+    const candidates = EXERCISES.filter(e=>e.muscleGroup===group && locationMatch(e.where, dayInfo.place));
+    const scored = candidates.map(e=>({ex:e, score:scoreExercise(e, todayStr, favoriteGroup)})).sort((a,b)=>b.score-a.score);
+    picks.push(...weightedPickN(scored, Math.min(n, scored.length)));
+  });
+  splitPlan[dayIndex] = {dayInfo, picks};
+}
+function buildSplitWeek(){
+  const p = getActiveProfile();
+  splitPlan = SPLIT_DAYS.map((d,i)=>{ buildSplitDay(i, p.favoriteGroup); return splitPlan[i]; });
+  persistActiveProfilePlan();
+  renderSchedule();
+}
+function rerollSplitDay(dayIndex){
+  const p = getActiveProfile();
+  buildSplitDay(dayIndex, p.favoriteGroup);
+  persistActiveProfilePlan();
+  renderSchedule();
+}
+
+// ---- Profiles ----
+const LS_PROFILES = "zt_profiles";
+let activeProfileId = null;
+
+function loadProfiles(){
+  const raw = localStorage.getItem(LS_PROFILES);
+  if(raw) return JSON.parse(raw);
+  const seed = [{id:1, name:"Основной", preset:"split", place:"home", favoriteGroup:"", classicPlan:[], splitPlan:[]}];
+  localStorage.setItem(LS_PROFILES, JSON.stringify(seed));
+  return seed;
+}
+function saveProfiles(arr){ localStorage.setItem(LS_PROFILES, JSON.stringify(arr)); }
+
+function getActiveProfile(){
+  const profiles = loadProfiles();
+  let p = profiles.find(x=>x.id===activeProfileId);
+  if(!p){ p = profiles[0]; activeProfileId = p.id; }
+  return p;
+}
+
+function persistActiveProfilePlan(){
+  const profiles = loadProfiles();
+  const p = profiles.find(x=>x.id===activeProfileId);
+  if(!p) return;
+  p.classicPlan = classicPlan.map(cp=>({dayIndex: CLASSIC_DAYS.indexOf(cp.dayInfo), exerciseNames: cp.picks.map(pk=>pk.ex.name)}));
+  p.splitPlan = splitPlan.map(sp=>({dayIndex: SPLIT_DAYS.indexOf(sp.dayInfo), exerciseNames: sp.picks.map(pk=>pk.ex.name)}));
+  saveProfiles(profiles);
+}
+
+function loadPlanFromProfile(p){
+  classicPlan = CLASSIC_DAYS.map((dayInfo,i)=>{
+    const saved = (p.classicPlan||[]).find(x=>x.dayIndex===i);
+    if(saved){
+      const picks = saved.exerciseNames.map(name=>{
+        const ex = EXERCISES.find(e=>e.name===name);
+        return ex ? {ex, score:null} : null;
+      }).filter(Boolean);
+      return {dayInfo, picks};
+    }
+    return {dayInfo, picks: []};
+  });
+  splitPlan = SPLIT_DAYS.map((dayInfo,i)=>{
+    const saved = (p.splitPlan||[]).find(x=>x.dayIndex===i);
+    if(saved){
+      const picks = saved.exerciseNames.map(name=>{
+        const ex = EXERCISES.find(e=>e.name===name);
+        return ex ? {ex, score:null} : null;
+      }).filter(Boolean);
+      return {dayInfo, picks};
+    }
+    return {dayInfo, picks: []};
+  });
+}
+
+function addProfile(){
+  const name = prompt('Название профиля:');
+  if(!name) return;
+  const profiles = loadProfiles();
+  const id = profiles.length ? Math.max(...profiles.map(p=>p.id))+1 : 1;
+  profiles.push({id, name, preset:"split", place:"home", favoriteGroup:"", classicPlan:[], splitPlan:[]});
+  saveProfiles(profiles);
+  activeProfileId = id;
+  renderProfileTabs();
+  renderSchedule();
+}
+
+function deleteProfile(id){
+  let profiles = loadProfiles();
+  if(profiles.length<=1){ alert('Должен остаться хотя бы один профиль'); return; }
+  if(!confirm('Удалить профиль?')) return;
+  profiles = profiles.filter(p=>p.id!==id);
+  saveProfiles(profiles);
+  if(activeProfileId===id) activeProfileId = profiles[0].id;
+  renderProfileTabs();
+  renderSchedule();
+}
+
+function switchProfile(id){
+  activeProfileId = id;
+  renderProfileTabs();
+  renderSchedule();
+}
+
+function updateProfileSetting(field, value){
+  const profiles = loadProfiles();
+  const p = profiles.find(x=>x.id===activeProfileId);
+  if(!p) return;
+  p[field] = value;
+  saveProfiles(profiles);
+  renderSchedule();
+}
+
+function renderProfileTabs(){
+  const profiles = loadProfiles();
+  if(!activeProfileId) activeProfileId = profiles[0].id;
+  const el = document.getElementById('profileTabs');
+  el.innerHTML = profiles.map(p=>`
+    <button class="btn ${p.id===activeProfileId?'':'secondary'} small" onclick="switchProfile(${p.id})">
+      ${p.name}${profiles.length>1 ? ` <span onclick="event.stopPropagation();deleteProfile(${p.id})" style="margin-left:6px;">✕</span>` : ''}
+    </button>
+  `).join('');
+
+  const p = getActiveProfile();
+  const settingsEl = document.getElementById('profileSettings');
+  const muscleOptions = ['<option value="">Без предпочтения</option>'].concat(
+    MUSCLE_GROUPS.map(m=>`<option value="${m}" ${m===p.favoriteGroup?'selected':''}>${m}</option>`)
+  ).join('');
+  settingsEl.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:end;">
+      <div>
+        <div class="note" style="margin-bottom:4px;">Формат</div>
+        <select onchange="updateProfileSetting('preset', this.value)">
+          <option value="split" ${p.preset==='split'?'selected':''}>Сплит (по дням, дом/улица)</option>
+          <option value="classic" ${p.preset==='classic'?'selected':''}>Классический (день = группа мышц)</option>
+        </select>
+      </div>
+      <div>
+        <div class="note" style="margin-bottom:4px;">Локация (для классического формата)</div>
+        <select onchange="updateProfileSetting('place', this.value)">
+          <option value="home" ${p.place==='home'?'selected':''}>Дом</option>
+          <option value="outside" ${p.place==='outside'?'selected':''}>Улица</option>
+          <option value="both" ${p.place==='both'?'selected':''}>Любая</option>
+        </select>
+      </div>
+      <div>
+        <div class="note" style="margin-bottom:4px;">Любимая группа мышц</div>
+        <select onchange="updateProfileSetting('favoriteGroup', this.value)">${muscleOptions}</select>
+      </div>
+    </div>
+  `;
+}
+
+function renderSchedule(){
+  const p = getActiveProfile();
+  const subtitle = document.getElementById('scheduleSubtitle');
+  const el = document.getElementById('scheduleContent');
+
+  if(p.preset==='classic'){
+    subtitle.textContent = 'Каждый день — новая группа мышц. Упражнения подбираются автоматически: избранные, давно не выполнявшиеся и любимая группа мышц профиля получают приоритет.';
+    if(!classicPlan.length || !classicPlan.some(c=>c.picks.length)) loadPlanFromProfile(p);
+    if(!classicPlan.some(c=>c.picks.length)){
+      el.innerHTML = `<div class="card"><button class="btn" onclick="buildClassicWeek()">Собрать неделю</button></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="card"><button class="btn" onclick="buildClassicWeek()">Пересобрать всю неделю</button></div>` +
+      classicPlan.map((cp,i)=>{
+        if(!cp.dayInfo.muscleGroup){
+          return `<div class="day-block card"><div class="day-head"><span class="dname">${cp.dayInfo.day}</span><span class="tag rest">Отдых</span></div></div>`;
+        }
+        const rows = cp.picks.map(pk=>{
+          const [label, cls] = WHERE_LABEL[pk.ex.where];
+          return `<div class="circle-label">${pk.ex.muscleGroup}${pk.score!==null?' · score '+pk.score:''} <span class="tag ${cls}" style="margin-left:6px;">${label}</span></div>
+          <div>${pk.ex.name}</div>
+          <div class="note">${pk.ex.sets}×${pk.ex.min}-${pk.ex.max} ${pk.ex.unit}</div>`;
+        }).join('');
+        return `<div class="day-block card">
+          <div class="day-head"><span class="dname">${cp.dayInfo.day}</span><span class="tag both">${cp.dayInfo.muscleGroup}</span></div>
+          ${rows || '<div class="note">Нет упражнений с этой группой мышц и локацией в справочнике</div>'}
+          <div style="margin-top:12px;"><button class="btn secondary small" onclick="rerollClassicDay(${i})">🔄 Пересобрать день</button></div>
+        </div>`;
+      }).join('');
+  } else {
+    subtitle.textContent = 'Каждый день — несколько групп мышц (дом/улица), подобранные автоматически с учётом избранного и любимой группы профиля.';
+    if(!splitPlan.length || !splitPlan.some(c=>c.picks.length)) loadPlanFromProfile(p);
+    if(!splitPlan.some(c=>c.picks.length)){
+      el.innerHTML = `<div class="card"><button class="btn" onclick="buildSplitWeek()">Собрать неделю</button></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="card"><button class="btn" onclick="buildSplitWeek()">Пересобрать всю неделю</button></div>` +
+      splitPlan.map((sp,i)=>{
+        if(!sp.dayInfo.counts){
+          return `<div class="day-block card"><div class="day-head"><span class="dname">${sp.dayInfo.day}</span><span class="tag rest">Отдых</span></div></div>`;
+        }
+        const [placeLabel, placeCls] = WHERE_LABEL[sp.dayInfo.place] || ["","both"];
+        const rows = sp.picks.map(pk=>{
+          const [label, cls] = WHERE_LABEL[pk.ex.where];
+          return `<div class="circle-label">${pk.ex.muscleGroup}${pk.score!==null?' · score '+pk.score:''} <span class="tag ${cls}" style="margin-left:6px;">${label}</span></div>
+          <div>${pk.ex.name}</div>
+          <div class="note">${pk.ex.sets}×${pk.ex.min}-${pk.ex.max} ${pk.ex.unit}</div>`;
+        }).join('');
+        return `<div class="day-block card">
+          <div class="day-head"><span class="dname">${sp.dayInfo.day}</span><span class="tag ${placeCls}">${placeLabel}</span></div>
+          ${rows || '<div class="note">Нет подходящих упражнений в справочнике</div>'}
+          <div style="margin-top:12px;"><button class="btn secondary small" onclick="rerollSplitDay(${i})">🔄 Пересобрать день</button></div>
+        </div>`;
+      }).join('');
+  }
+}
+
+// ---------------------------------------------------------------------
+// Cooking methods (weight multiplier applied to raw grams -> cooked weight;
+// nutrient totals are always computed from RAW grams, unaffected by method)
+// ---------------------------------------------------------------------
+const COOKING_METHODS = [
+  {name:"Без обработки (сырое)", mult:1.0},
+  {name:"Варка (крупы/макароны)", mult:2.7},
+  {name:"Варка (мясо/рыба/яйца/овощи)", mult:0.75},
+  {name:"Жарка", mult:0.75},
+  {name:"Запекание/тушение", mult:0.85},
+  {name:"Гриль", mult:0.7},
+];
+
+const DEFAULT_INGREDIENTS = [
+  {name:"Гречка (сухая)", kcal:313, protein:12.6, fat:3.3, carb:62, price:8},
+  {name:"Рис (сухой)", kcal:344, protein:6.7, fat:0.7, carb:78, price:9},
+  {name:"Овсянка (сухая)", kcal:342, protein:12, fat:6, carb:59, price:7},
+  {name:"Куриная грудка (сырая)", kcal:165, protein:31, fat:3.6, carb:0, price:35},
+  {name:"Яйцо куриное", kcal:157, protein:12.7, fat:11.5, carb:0.7, price:12},
+  {name:"Творог 5%", kcal:121, protein:17, fat:5, carb:3, price:20},
+  {name:"Молоко 2.5%", kcal:52, protein:2.8, fat:2.5, carb:4.7, price:9},
+  {name:"Картофель", kcal:77, protein:2, fat:0.4, carb:16, price:5},
+  {name:"Лук репчатый", kcal:41, protein:1.4, fat:0.2, carb:8.2, price:4},
+  {name:"Сосиска", kcal:266, protein:11, fat:24, carb:2, price:25},
+  {name:"Кетчуп", kcal:93, protein:1.6, fat:0.2, carb:20, price:15},
+  {name:"Масло растительное", kcal:900, protein:0, fat:100, carb:0, price:12},
+  {name:"Хлеб пшеничный", kcal:265, protein:8, fat:3, carb:50, price:6},
+];
+
+// ---------------------------------------------------------------------
 // Storage
 // ---------------------------------------------------------------------
 const LS_KBJU = "zt_kbju";
 const LS_JOURNAL = "zt_journal";
+const LS_INGREDIENTS = "zt_ingredients";
+const LS_DISHES = "zt_dishes";
 
 function loadKbju(){
   const raw = localStorage.getItem(LS_KBJU);
   return raw ? JSON.parse(raw) : null;
 }
-function saveKbjuLocal(data){ localStorage.setItem(LS_KBJU, JSON.stringify(data)); }
-function saveKbju(data){
-  saveKbjuLocal(data);
-  localStorage.setItem('zt_local_updated', String(Date.now()));
-  if(typeof pushToCloud==='function') pushToCloud();
-}
+function saveKbju(data){ localStorage.setItem(LS_KBJU, JSON.stringify(data)); }
 
 function loadJournal(){
   const raw = localStorage.getItem(LS_JOURNAL);
   if(raw) return JSON.parse(raw);
-  // seed with historical data on first run
   const seed = [
     {id:1, date:"2026-07-06", exercise:"Подтягивания", sets:[2,2,1,0], notes:"надо начинать треню с этого"},
     {id:2, date:"2026-07-06", exercise:"Отжимания классические", sets:[14,9,8,6], notes:""},
@@ -464,11 +985,40 @@ function loadJournal(){
   localStorage.setItem(LS_JOURNAL, JSON.stringify(seed));
   return seed;
 }
-function saveJournalLocal(data){ localStorage.setItem(LS_JOURNAL, JSON.stringify(data)); }
-function saveJournal(data){
-  saveJournalLocal(data);
-  localStorage.setItem('zt_local_updated', String(Date.now()));
-  if(typeof pushToCloud==='function') pushToCloud();
+function saveJournal(data){ localStorage.setItem(LS_JOURNAL, JSON.stringify(data)); }
+
+function loadIngredients(){
+  const raw = localStorage.getItem(LS_INGREDIENTS);
+  if(raw) return JSON.parse(raw);
+  localStorage.setItem(LS_INGREDIENTS, JSON.stringify(DEFAULT_INGREDIENTS));
+  return DEFAULT_INGREDIENTS.slice();
+}
+function saveIngredients(data){ localStorage.setItem(LS_INGREDIENTS, JSON.stringify(data)); }
+
+function loadDishes(){
+  const raw = localStorage.getItem(LS_DISHES);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveDishes(data){ localStorage.setItem(LS_DISHES, JSON.stringify(data)); }
+
+const LS_MEALLOG = "zt_meallog";
+function loadMealLog(){
+  const raw = localStorage.getItem(LS_MEALLOG);
+  return raw ? JSON.parse(raw) : [];
+}
+function saveMealLog(log){ localStorage.setItem(LS_MEALLOG, JSON.stringify(log)); }
+function logMealChoice(date, slotKey, dishId){
+  let log = loadMealLog();
+  log = log.filter(e=> !(e.date===date && e.slot===slotKey));
+  if(dishId) log.push({date, slot:slotKey, dishId});
+  saveMealLog(log);
+}
+function daysSinceLastEaten(dishId, todayStr){
+  const log = loadMealLog().filter(e=>e.dishId===dishId && e.date<todayStr);
+  if(!log.length) return Infinity;
+  const todayDate = new Date(todayStr);
+  const diffs = log.map(e=>Math.round((todayDate-new Date(e.date))/86400000));
+  return Math.min(...diffs);
 }
 
 // ---------------------------------------------------------------------
@@ -484,7 +1034,6 @@ document.querySelectorAll('nav button').forEach(btn=>{
     closeNav();
   });
 });
-
 function toggleNav(){
   document.getElementById('mainNav').classList.toggle('open');
   document.getElementById('overlay').classList.toggle('open');
@@ -543,21 +1092,384 @@ function initKbju(){
 }
 
 // ---------------------------------------------------------------------
-// Schedule page
+// Meal plan auto-picker
 // ---------------------------------------------------------------------
-function renderSchedule(){
-  const el = document.getElementById('scheduleContent');
-  el.innerHTML = SCHEDULE.map(d=>{
-    const [label, cls] = WHERE_LABEL[d.place] || ["Отдых","rest"];
-    return `<div class="day-block card">
-      <div class="day-head"><span class="dname">${d.day}</span><span class="tag ${cls}">${label}</span></div>
-      ${d.circles.map(c=>`
-        <div class="circle-label">${c.label}</div>
-        <div>${c.ex}</div>
-        <div class="note">${c.sets} — ${c.muscles}</div>
-      `).join('')}
+const MEAL_SLOTS = [
+  {key:'breakfast', label:'Завтрак', frac:0.25},
+  {key:'lunch', label:'Обед', frac:0.35},
+  {key:'dinner', label:'Ужин', frac:0.30},
+  {key:'snack', label:'Перекус', frac:0.10},
+];
+let currentPlan = [];
+
+function computeTargetMacros(s){
+  if(!s) return {kcal:2000, protein:100, fat:60, carb:250};
+  const bmr = 10*s.weight + 6.25*s.height - 5*s.age + 5;
+  const tdee = bmr*s.activity;
+  const target = tdee + s.surplus;
+  const proteinG = s.weight*s.proteinPerKg;
+  const fatKcal = target*(s.fatPct/100);
+  const fatG = fatKcal/9;
+  const carbKcal = target - proteinG*4 - fatKcal;
+  const carbG = carbKcal/4;
+  return {kcal:target, protein:proteinG, fat:fatG, carb:carbG};
+}
+
+function scoreDish(dish, ideal, todayStr, avgPrice){
+  let score = 100;
+  const days = daysSinceLastEaten(dish.id, todayStr);
+  if(days===1) score -= 60;
+  else if(days===2) score -= 30;
+  else if(days>=7) score += 20;
+
+  const dims = [[dish.kcal,ideal.kcal],[dish.protein,ideal.protein],[dish.fat,ideal.fat],[dish.carb,ideal.carb]];
+  const errs = dims.map(([actual,idealVal])=> idealVal>0 ? Math.abs(actual-idealVal)/idealVal : (actual>0?1:0));
+  let avgErr = errs.reduce((a,b)=>a+b,0)/errs.length;
+  avgErr = Math.min(avgErr,1);
+  score += Math.round(40 - avgErr*110);
+
+  if(avgPrice>0){
+    if(dish.price < avgPrice*0.8) score += 15;
+    else if(dish.price > avgPrice*1.2) score -= 15;
+  }
+  if(dish.favorite==='liked') score += 10;
+  else if(dish.favorite==='disliked') score -= 50;
+
+  return score;
+}
+
+function weightedPick(scoredList){
+  if(!scoredList.length) return null;
+  const minScore = Math.min(...scoredList.map(s=>s.score));
+  const shift = minScore<1 ? (1-minScore) : 0;
+  const weights = scoredList.map(s=>s.score+shift);
+  const total = weights.reduce((a,b)=>a+b,0);
+  if(total<=0) return scoredList[Math.floor(Math.random()*scoredList.length)];
+  let r = Math.random()*total;
+  for(let i=0;i<scoredList.length;i++){
+    r -= weights[i];
+    if(r<=0) return scoredList[i];
+  }
+  return scoredList[scoredList.length-1];
+}
+
+function regenerateFrom(startIndex, forceDifferentAtStart){
+  const dishes = loadDishes();
+  if(!dishes.length){
+    document.getElementById('dayPlanWrap').innerHTML = '<div class="note">Сначала сохрани хотя бы пару блюд в конструкторе ниже.</div>';
+    return;
+  }
+  if(!currentPlan.length){
+    currentPlan = MEAL_SLOTS.map(s=>({slot:s, picked:null, score:null, remainingAfter:null, idealPortion:null}));
+  }
+  const todayStr = new Date().toISOString().slice(0,10);
+  const avgPrice = dishes.length ? dishes.reduce((a,d)=>a+(d.price||0),0)/dishes.length : 0;
+  const target = computeTargetMacros(loadKbju());
+
+  let remaining = startIndex===0 ? {...target} : {...currentPlan[startIndex-1].remainingAfter};
+  const usedIds = new Set();
+  for(let i=0;i<startIndex;i++){ if(currentPlan[i].picked) usedIds.add(currentPlan[i].picked.id); }
+  const prevPickId = (forceDifferentAtStart && currentPlan[startIndex].picked) ? currentPlan[startIndex].picked.id : null;
+
+  let fracSum = 0;
+  for(let i=startIndex;i<MEAL_SLOTS.length;i++) fracSum += MEAL_SLOTS[i].frac;
+
+  for(let i=startIndex;i<MEAL_SLOTS.length;i++){
+    const slot = MEAL_SLOTS[i];
+    const share = fracSum>0 ? slot.frac/fracSum : 0;
+    const idealPortion = {
+      kcal: Math.max(remaining.kcal,0)*share,
+      protein: Math.max(remaining.protein,0)*share,
+      fat: Math.max(remaining.fat,0)*share,
+      carb: Math.max(remaining.carb,0)*share,
+    };
+    let candidates = dishes.filter(d=>!usedIds.has(d.id));
+    if(i===startIndex && prevPickId){
+      const filtered = candidates.filter(d=>d.id!==prevPickId);
+      if(filtered.length) candidates = filtered;
+    }
+    let pick = null, pickedScore = null;
+    if(candidates.length){
+      const scored = candidates.map(d=>({dish:d, score:scoreDish(d, idealPortion, todayStr, avgPrice)}))
+                                .sort((a,b)=>b.score-a.score);
+      const top = scored.slice(0, Math.min(5, scored.length));
+      const chosen = weightedPick(top);
+      pick = chosen.dish;
+      pickedScore = chosen.score;
+      usedIds.add(pick.id);
+      remaining = {
+        kcal: remaining.kcal - pick.kcal,
+        protein: remaining.protein - pick.protein,
+        fat: remaining.fat - pick.fat,
+        carb: remaining.carb - pick.carb,
+      };
+    }
+    logMealChoice(todayStr, slot.key, pick ? pick.id : null);
+    currentPlan[i] = {slot, picked:pick, score:pickedScore, remainingAfter:{...remaining}, idealPortion};
+    fracSum -= slot.frac;
+  }
+  renderDayPlan(target);
+}
+
+function buildDayPlan(){ regenerateFrom(0, false); }
+function rerollSlot(i){ regenerateFrom(i, true); }
+
+function renderDayPlan(target){
+  const t = target || computeTargetMacros(loadKbju());
+  const el = document.getElementById('dayPlanWrap');
+  if(!currentPlan.length){
+    el.innerHTML = `<div class="note">Нужно на день: ${Math.round(t.kcal)} ккал / Б ${Math.round(t.protein)} / Ж ${Math.round(t.fat)} / У ${Math.round(t.carb)}. Нажми «Собрать день».</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="note" style="margin-bottom:12px;">Нужно на день: <b>${Math.round(t.kcal)} ккал</b> / Б ${Math.round(t.protein)} / Ж ${Math.round(t.fat)} / У ${Math.round(t.carb)}</div>` +
+    currentPlan.map((p,i)=>{
+      if(!p.picked){
+        return `<div class="stat-card">
+          <div class="name">${p.slot.label}</div>
+          <div class="note">Нет подходящих блюд (добавь ещё блюда в конструкторе)</div>
+        </div>`;
+      }
+      const d = p.picked;
+      return `<div class="stat-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="name">${p.slot.label}: ${d.name}</div>
+          <button class="btn secondary small" onclick="rerollSlot(${i})">🔄 Пересобрать</button>
+        </div>
+        <div class="pill-row" style="margin-top:6px;">
+          <span>Ккал: <b>${d.kcal}</b></span>
+          <span>Белки: <b>${d.protein}</b></span>
+          <span>Жиры: <b>${d.fat}</b></span>
+          <span>Углеводы: <b>${d.carb}</b></span>
+          <span>Score: <b>${p.score}</b></span>
+        </div>
+        <div class="note" style="margin-top:6px;">Осталось после этого приёма: ${Math.round(p.remainingAfter.kcal)} ккал / Б ${Math.round(p.remainingAfter.protein)} / Ж ${Math.round(p.remainingAfter.fat)} / У ${Math.round(p.remainingAfter.carb)}</div>
+      </div>`;
+    }).join('');
+}
+
+// ---------------------------------------------------------------------
+// Ingredients table
+// ---------------------------------------------------------------------
+function toggleIngredientBlock(){
+  const block = document.getElementById('ingredientBlock');
+  const btn = document.getElementById('ingToggleBtn');
+  const isHidden = block.style.display === 'none';
+  block.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Скрыть список ингредиентов' : 'Показать список ингредиентов';
+}
+
+function renderIngredients(){
+  const ingredients = loadIngredients();
+  const tbody = document.getElementById('ingredientTable');
+  tbody.innerHTML = ingredients.map((ing,i)=>`<tr>
+    <td><b>${ing.name}</b></td>
+    <td class="mono">${ing.kcal}</td>
+    <td class="mono">${ing.protein}</td>
+    <td class="mono">${ing.fat}</td>
+    <td class="mono">${ing.carb}</td>
+    <td class="mono">${ing.price||0}</td>
+    <td><span style="color:var(--danger);cursor:pointer;" onclick="deleteIngredient(${i})">✕</span></td>
+  </tr>`).join('');
+  refreshDishIngredientOptions();
+}
+
+function addIngredient(){
+  const name = document.getElementById('newIngName').value.trim();
+  const kcal = parseFloat(document.getElementById('newIngKcal').value)||0;
+  const protein = parseFloat(document.getElementById('newIngProtein').value)||0;
+  const fat = parseFloat(document.getElementById('newIngFat').value)||0;
+  const carb = parseFloat(document.getElementById('newIngCarb').value)||0;
+  const price = parseFloat(document.getElementById('newIngPrice').value)||0;
+  if(!name){ alert('Укажи название ингредиента'); return; }
+  const ingredients = loadIngredients();
+  ingredients.push({name, kcal, protein, fat, carb, price});
+  saveIngredients(ingredients);
+  ['newIngName','newIngKcal','newIngProtein','newIngFat','newIngCarb','newIngPrice'].forEach(id=>document.getElementById(id).value='');
+  renderIngredients();
+}
+
+function deleteIngredient(index){
+  const ingredients = loadIngredients();
+  ingredients.splice(index,1);
+  saveIngredients(ingredients);
+  renderIngredients();
+}
+
+// ---------------------------------------------------------------------
+// Dish constructor
+// ---------------------------------------------------------------------
+let dishRows = [{ingredientIndex:0, grams:100, methodIndex:0}];
+
+function refreshDishIngredientOptions(){
+  renderDishRows();
+}
+
+function addDishRow(){
+  dishRows.push({ingredientIndex:0, grams:100, methodIndex:0});
+  renderDishRows();
+}
+function removeDishRow(i){
+  dishRows.splice(i,1);
+  renderDishRows();
+}
+
+function renderDishRows(){
+  const ingredients = loadIngredients();
+  const el = document.getElementById('dishRows');
+  el.innerHTML = dishRows.map((row,i)=>{
+    const ingOptions = ingredients.map((ing,ii)=>`<option value="${ii}" ${ii===row.ingredientIndex?'selected':''}>${ing.name}</option>`).join('');
+    const methodOptions = COOKING_METHODS.map((m,mi)=>`<option value="${mi}" ${mi===row.methodIndex?'selected':''}>${m.name}</option>`).join('');
+    return `<div class="dish-row">
+      <select onchange="dishRows[${i}].ingredientIndex=parseInt(this.value);calcDish();">${ingOptions}</select>
+      <input type="number" value="${row.grams}" placeholder="грамм" onchange="dishRows[${i}].grams=parseFloat(this.value)||0;calcDish();">
+      <select onchange="dishRows[${i}].methodIndex=parseInt(this.value);calcDish();">${methodOptions}</select>
+      <span class="mono" style="font-size:11px;color:var(--muted);" id="dishRowCooked${i}">—</span>
+      <span style="color:var(--danger);cursor:pointer;text-align:center;" onclick="removeDishRow(${i})">✕</span>
     </div>`;
   }).join('');
+  calcDish();
+}
+
+function calcDish(){
+  const ingredients = loadIngredients();
+  let rawWeight=0, cookedWeight=0, kcal=0, protein=0, fat=0, carb=0, priceAuto=0;
+  dishRows.forEach((row,i)=>{
+    const ing = ingredients[row.ingredientIndex];
+    if(!ing) return;
+    const grams = row.grams||0;
+    const mult = COOKING_METHODS[row.methodIndex].mult;
+    const cooked = grams*mult;
+    rawWeight += grams;
+    cookedWeight += cooked;
+    kcal += grams/100*ing.kcal;
+    protein += grams/100*ing.protein;
+    fat += grams/100*ing.fat;
+    carb += grams/100*ing.carb;
+    priceAuto += grams/100*(ing.price||0);
+    const cell = document.getElementById('dishRowCooked'+i);
+    if(cell) cell.textContent = Math.round(cooked)+' г готово';
+  });
+  document.getElementById('dishRawWeight').textContent = Math.round(rawWeight)+' г';
+  document.getElementById('dishCookedWeight').textContent = Math.round(cookedWeight)+' г';
+  document.getElementById('dishKcal').textContent = Math.round(kcal);
+  document.getElementById('dishProtein').textContent = Math.round(protein*10)/10+' г';
+  document.getElementById('dishFat').textContent = Math.round(fat*10)/10+' г';
+  document.getElementById('dishCarb').textContent = Math.round(carb*10)/10+' г';
+  document.getElementById('dishPriceAuto').textContent = Math.round(priceAuto)+' руб';
+  return {rawWeight, cookedWeight, kcal, protein, fat, carb, priceAuto};
+}
+
+function saveDish(){
+  const name = document.getElementById('dishName').value.trim();
+  if(!name){ alert('Укажи название блюда'); return; }
+  const totals = calcDish();
+  const priceOverrideRaw = document.getElementById('dishPriceOverride').value;
+  const price = priceOverrideRaw!=='' ? parseFloat(priceOverrideRaw)||0 : totals.priceAuto;
+  const tagsRaw = document.getElementById('dishTags').value.trim();
+  const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
+
+  const dishes = loadDishes();
+  const id = dishes.length ? Math.max(...dishes.map(d=>d.id))+1 : 1;
+  dishes.push({
+    id, name, tags, favorite:'none',
+    rawWeight: Math.round(totals.rawWeight),
+    cookedWeight: Math.round(totals.cookedWeight),
+    kcal: Math.round(totals.kcal),
+    protein: Math.round(totals.protein*10)/10,
+    fat: Math.round(totals.fat*10)/10,
+    carb: Math.round(totals.carb*10)/10,
+    price: Math.round(price)
+  });
+  saveDishes(dishes);
+
+  document.getElementById('dishName').value='';
+  document.getElementById('dishTags').value='';
+  document.getElementById('dishPriceOverride').value='';
+  dishRows = [{ingredientIndex:0, grams:100, methodIndex:0}];
+  renderDishRows();
+  renderDishList();
+}
+
+function deleteDish(id){
+  let dishes = loadDishes();
+  dishes = dishes.filter(d=>d.id!==id);
+  saveDishes(dishes);
+  renderDishList();
+}
+
+function toggleFavorite(id){
+  const dishes = loadDishes();
+  const d = dishes.find(x=>x.id===id);
+  if(!d) return;
+  const order = {none:'liked', liked:'disliked', disliked:'none'};
+  d.favorite = order[d.favorite||'none'];
+  saveDishes(dishes);
+  renderDishList();
+}
+
+function favoriteLabel(fav){
+  if(fav==='liked') return '★ Любимое';
+  if(fav==='disliked') return '👎 Не нравится';
+  return '☆ Отметить';
+}
+
+function toggleDishBlock(){
+  const block = document.getElementById('dishBlock');
+  const btn = document.getElementById('dishToggleBtn');
+  const isHidden = block.style.display === 'none';
+  block.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Скрыть наши блюда' : 'Показать наши блюда';
+}
+
+function dishCardHtml(d){
+  const per100 = d.cookedWeight>0 ? {
+    kcal: Math.round(d.kcal/d.cookedWeight*100),
+    protein: Math.round(d.protein/d.cookedWeight*100*10)/10,
+    fat: Math.round(d.fat/d.cookedWeight*100*10)/10,
+    carb: Math.round(d.carb/d.cookedWeight*100*10)/10,
+  } : {kcal:0,protein:0,fat:0,carb:0};
+  return `<div class="dish-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div class="name">${d.name}</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="cursor:pointer;font-size:11px;color:var(--muted);" onclick="toggleFavorite(${d.id})">${favoriteLabel(d.favorite)}</span>
+        <span style="color:var(--danger);cursor:pointer;font-size:12px;" onclick="deleteDish(${d.id})">✕ удалить</span>
+      </div>
+    </div>
+    <div class="pill-row">
+      <span>Вес готового: <b>${d.cookedWeight} г</b></span>
+      <span>Цена: <b>${d.price} руб</b></span>
+    </div>
+    <div class="pill-row" style="margin-top:6px;">
+      <span>Всего: <b>${d.kcal} ккал</b> / Б <b>${d.protein}</b> / Ж <b>${d.fat}</b> / У <b>${d.carb}</b></span>
+    </div>
+    <div class="pill-row" style="margin-top:6px;">
+      <span>На 100г: <b>${per100.kcal} ккал</b> / Б <b>${per100.protein}</b> / Ж <b>${per100.fat}</b> / У <b>${per100.carb}</b></span>
+    </div>
+  </div>`;
+}
+
+function renderDishList(){
+  const dishes = loadDishes();
+  const el = document.getElementById('dishList');
+  if(!dishes.length){ el.innerHTML = '<div class="note">Пока нет сохранённых блюд</div>'; return; }
+
+  const folders = {};
+  dishes.forEach(d=>{
+    const tags = (d.tags && d.tags.length) ? d.tags : ['Без тега'];
+    tags.forEach(t=>{
+      if(!folders[t]) folders[t]=[];
+      folders[t].push(d);
+    });
+  });
+
+  el.innerHTML = Object.keys(folders).sort().map(tag=>`
+    <details style="margin-bottom:10px;">
+      <summary style="cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.03em;
+        color:var(--accent);font-size:13px;padding:8px 0;">${tag} (${folders[tag].length})</summary>
+      <div style="padding-top:8px;">${folders[tag].map(dishCardHtml).join('')}</div>
+    </details>
+  `).join('');
 }
 
 // ---------------------------------------------------------------------
@@ -569,21 +1481,74 @@ function targetLabel(e){
   return `${e.sets}×${e.min}-${e.max} ${suffix}`;
 }
 function renderReference(){
-  const tbody = document.getElementById('refTable');
-  tbody.innerHTML = EXERCISES.map(e=>{
+  const el = document.getElementById('refList');
+  const searchEl = document.getElementById('refSearch');
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  const entries = EXERCISES.map((e,i)=>({e,i})).filter(({e})=> !search || e.name.toLowerCase().includes(search));
+  el.innerHTML = entries.map(({e,i})=>{
     const [label, cls] = WHERE_LABEL[e.where];
-    return `<tr>
-      <td><b>${e.name}</b></td>
-      <td><span class="tag ${cls}">${label}</span></td>
-      <td class="mono">${targetLabel(e)}</td>
-      <td class="tech-note">${e.tech}</td>
-    </tr>`;
+    const suffix = e.unit.includes('на ногу') ? '(на ногу)' : e.unit.includes('на руку') ? '(на руку)' : e.unit;
+    const muscleSelect = MUSCLE_GROUPS.map(m=>`<option value="${m}" ${m===e.muscleGroup?'selected':''}>${m}</option>`).join('');
+    return `<div class="dish-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <div class="name">${e.name}</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <select class="tag ${cls}" style="border:none;font-family:inherit;letter-spacing:inherit;text-transform:uppercase;
+            cursor:pointer;" onchange="updateExerciseWhere(${i},this.value)">
+            <option value="home" ${e.where==='home'?'selected':''}>Дом</option>
+            <option value="outside" ${e.where==='outside'?'selected':''}>Улица</option>
+            <option value="both" ${e.where==='both'?'selected':''}>Дом / Улица</option>
+          </select>
+          <span style="cursor:pointer;font-size:11px;color:var(--muted);" onclick="toggleExerciseLike(${i})">${likeLabel(e.liked)}</span>
+          <span style="color:var(--danger);cursor:pointer;font-size:12px;" onclick="deleteExercise(${i})">✕ удалить</span>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin-top:10px;">
+        <div>
+          <div class="note" style="margin-bottom:4px;">Группа мышц</div>
+          <select style="background:var(--surface2);border:1px solid var(--line);color:var(--text);padding:6px 8px;
+            border-radius:6px;font-size:12px;" onchange="updateExerciseMuscle(${i},this.value)">${muscleSelect}</select>
+        </div>
+        <div>
+          <div class="note" style="margin-bottom:4px;">Подходы × повторы</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <input type="number" value="${e.sets}" style="width:44px;background:var(--surface2);border:1px solid var(--line);
+              color:var(--text);padding:6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+              onchange="updateExerciseField(${i},'sets',this.value)">×
+            <input type="number" value="${e.min}" style="width:50px;background:var(--surface2);border:1px solid var(--line);
+              color:var(--text);padding:6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+              onchange="updateExerciseField(${i},'min',this.value)">-
+            <input type="number" value="${e.max}" style="width:50px;background:var(--surface2);border:1px solid var(--line);
+              color:var(--text);padding:6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+              onchange="updateExerciseField(${i},'max',this.value)">
+            <span class="note">${suffix}</span>
+          </div>
+        </div>
+        <div>
+          <div class="note" style="margin-bottom:4px;">Финальная цель</div>
+          <input type="number" value="${e.finalGoal}" style="width:70px;background:var(--surface2);border:1px solid var(--line);
+            color:var(--text);padding:6px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
+            onchange="updateExerciseField(${i},'finalGoal',this.value)">
+        </div>
+      </div>
+
+      <div class="tech-note" style="margin-top:10px;">Объём цели уровня: ${targetVolume(e)}. ${e.tech}</div>
+    </div>`;
   }).join('');
 }
 
 // ---------------------------------------------------------------------
 // Journal page
 // ---------------------------------------------------------------------
+function toggleAddEntryBlock(){
+  const block = document.getElementById('addEntryBlock');
+  const btn = document.getElementById('addEntryToggleBtn');
+  const isHidden = block.style.display === 'none';
+  block.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? 'Скрыть форму' : '+ Добавить тренировку';
+}
+
 function initJournalForm(){
   const sel = document.getElementById('jExercise');
   sel.innerHTML = EXERCISES.map(e=>`<option value="${e.name}">${e.name}</option>`).join('');
@@ -653,170 +1618,6 @@ function renderJournalList(){
 }
 
 // ---------------------------------------------------------------------
-// Dashboard / stats
-// ---------------------------------------------------------------------
-function renderDashboard(){
-  const journal = loadJournal();
-  const dates = journal.map(j=>j.date).filter(Boolean).sort();
-  const startDate = dates.length ? dates[0] : new Date().toISOString().slice(0,10);
-  const today = new Date().toISOString().slice(0,10);
-  const weekNum = Math.floor((new Date(today) - new Date(startDate))/(7*86400000)) + 1;
-
-  document.getElementById('dbWeek').textContent = weekNum;
-  document.getElementById('dbSessions').textContent = journal.length;
-  document.getElementById('dbStart').textContent = startDate.split('-').reverse().join('.');
-  document.getElementById('dbToday').textContent = today.split('-').reverse().join('.');
-
-  // weekly volume chart
-  const weekTotals = {};
-  journal.forEach(j=>{
-    const wk = Math.floor((new Date(j.date) - new Date(startDate))/(7*86400000)) + 1;
-    const total = j.sets.reduce((a,b)=>a+b,0);
-    weekTotals[wk] = (weekTotals[wk]||0) + total;
-  });
-  const maxWeek = Math.max(1, ...Object.keys(weekTotals).map(Number));
-  const maxVal = Math.max(1, ...Object.values(weekTotals));
-  const chartEl = document.getElementById('weekChart');
-  let bars = '';
-  for(let w=1; w<=Math.max(maxWeek,4); w++){
-    const val = weekTotals[w]||0;
-    const h = Math.round((val/maxVal)*100);
-    bars += `<div class="bar" style="height:${h}%"><span>Н${w}</span></div>`;
-  }
-  chartEl.innerHTML = bars;
-
-  // per-exercise stats
-  const statEl = document.getElementById('statList');
-  statEl.innerHTML = EXERCISES.map(e=>{
-    const entries = journal.filter(j=>j.exercise===e.name && j.sets.reduce((a,b)=>a+b,0)>0)
-                            .sort((a,b)=> a.date < b.date ? -1 : 1);
-    const target = targetVolume(e);
-    if(!entries.length){
-      return `<div class="stat-card">
-        <div class="name">${e.name}</div>
-        <div class="progress-wrap"><div class="progress-gauge"><div class="progress-fill" style="width:0%"></div></div><div class="progress-pct">0%</div></div>
-        <div class="stat-meta"><span>Тренировок: <b>0</b></span><span>Цель: <b>${target}</b></span></div>
-      </div>`;
-    }
-    const totals = entries.map(j=>j.sets.reduce((a,b)=>a+b,0));
-    const last = totals[totals.length-1];
-    const first = totals[0];
-    const best = Math.max(...totals);
-    const avg = Math.round((totals.reduce((a,b)=>a+b,0)/totals.length)*10)/10;
-    const pct = Math.min(1, last/target);
-    const remaining = Math.max(0, target-last);
-    const progress = entries.length>1 ? last-first : null;
-    return `<div class="stat-card">
-      <div class="name">${e.name}</div>
-      <div class="progress-wrap">
-        <div class="progress-gauge"><div class="progress-fill" style="width:${Math.round(pct*100)}%"></div></div>
-        <div class="progress-pct">${Math.round(pct*100)}%</div>
-      </div>
-      <div class="stat-meta">
-        <span>Последний: <b>${last}</b></span>
-        <span>Цель: <b>${target}</b></span>
-        <span>Осталось: <b>${remaining}</b></span>
-        <span>Тренировок: <b>${entries.length}</b></span>
-        <span>Средний: <b>${avg}</b></span>
-        <span>Лучший: <b>${best}</b></span>
-        ${progress!==null ? `<span>С начала: <b>${progress>=0?'+':''}${progress}</b></span>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ---------------------------------------------------------------------
-// Cloud sync (Firebase Firestore) — optional, off by default
-// ---------------------------------------------------------------------
-const LS_FB_CONFIG = "zt_fb_config";
-const LS_FB_SYNCCODE = "zt_fb_synccode";
-let fbApp = null, fbDb = null, fbEnabled = false;
-
-function initSync(){
-  const configRaw = localStorage.getItem(LS_FB_CONFIG);
-  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
-  if(!configRaw || !syncCode) return;
-  try{
-    const config = JSON.parse(configRaw);
-    fbApp = firebase.initializeApp(config);
-    fbDb = firebase.firestore();
-    fbEnabled = true;
-    document.getElementById('fbConfig').value = configRaw;
-    document.getElementById('fbSyncCode').value = syncCode;
-    setSyncStatus('подключено: '+syncCode);
-    pullFromCloud(false);
-  }catch(err){
-    console.error('Firebase init error', err);
-    setSyncStatus('ошибка конфигурации');
-  }
-}
-
-function setSyncStatus(text){
-  const el = document.getElementById('syncStatus');
-  if(el) el.textContent = text;
-}
-function setSyncLast(){
-  const el = document.getElementById('syncLast');
-  if(el) el.textContent = new Date().toLocaleTimeString('ru-RU');
-}
-
-function connectSync(){
-  const configRaw = document.getElementById('fbConfig').value.trim();
-  const syncCode = document.getElementById('fbSyncCode').value.trim();
-  if(!configRaw || !syncCode){ alert('Заполни оба поля'); return; }
-  try{
-    JSON.parse(configRaw);
-  }catch(err){ alert('Config должен быть валидным JSON-объектом'); return; }
-
-  localStorage.setItem(LS_FB_CONFIG, configRaw);
-  localStorage.setItem(LS_FB_SYNCCODE, syncCode);
-  location.reload();
-}
-
-function disconnectSync(){
-  if(!confirm('Отключить облако? Данные останутся локально на этом устройстве.')) return;
-  localStorage.removeItem(LS_FB_CONFIG);
-  localStorage.removeItem(LS_FB_SYNCCODE);
-  location.reload();
-}
-
-function pushToCloud(){
-  if(!fbEnabled) return;
-  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
-  const payload = { kbju: loadKbju(), journal: loadJournal(), updatedAt: Date.now() };
-  fbDb.collection('syncData').doc(syncCode).set(payload)
-    .then(()=> setSyncLast())
-    .catch(err=>{ console.error('push error', err); setSyncStatus('ошибка записи в облако'); });
-}
-
-function pullFromCloud(manual){
-  if(!fbEnabled) return;
-  const syncCode = localStorage.getItem(LS_FB_SYNCCODE);
-  fbDb.collection('syncData').doc(syncCode).get().then(doc=>{
-    if(doc.exists){
-      const data = doc.data();
-      const localJournal = loadJournal();
-      const localUpdatedAt = parseInt(localStorage.getItem('zt_local_updated')||'0');
-      // cloud wins unless local is strictly newer (simple last-write-wins)
-      if(!data.updatedAt || data.updatedAt >= localUpdatedAt){
-        if(data.kbju) saveKbjuLocal(data.kbju);
-        if(data.journal) saveJournalLocal(data.journal);
-        initKbju();
-        renderJournalList();
-        renderDashboard();
-      }
-      setSyncLast();
-      if(manual) alert('Синхронизировано');
-    } else if(manual){
-      alert('В облаке пока нет данных для этого кода — при следующем изменении данные будут отправлены туда.');
-    }
-  }).catch(err=>{
-    console.error('pull error', err);
-    setSyncStatus('ошибка чтения из облака');
-  });
-}
-
-// ---------------------------------------------------------------------
 // Quick paste parser
 // ---------------------------------------------------------------------
 let pasteParsed = [];
@@ -828,13 +1629,10 @@ function normalizeStr(s){
 function guessExercise(rawName){
   const norm = normalizeStr(rawName);
   if(!norm) return null;
-  // exact match first
   let match = EXERCISES.find(e=>normalizeStr(e.name)===norm);
   if(match) return match.name;
-  // startsWith / includes match
   match = EXERCISES.find(e=>normalizeStr(e.name).includes(norm) || norm.includes(normalizeStr(e.name)));
   if(match) return match.name;
-  // word-overlap scoring fallback
   const words = norm.split(' ').filter(w=>w.length>2);
   let best = null, bestScore = 0;
   EXERCISES.forEach(e=>{
@@ -907,34 +1705,33 @@ function parsePaste(){
 }
 
 function renderPastePreview(){
-  const card = document.getElementById('pastePreviewCard');
+  const wrap = document.getElementById('pastePreviewWrap');
   const el = document.getElementById('pastePreview');
+  wrap.style.display = 'block';
   if(!pasteParsed.length){
-    card.style.display='block';
     el.innerHTML = '<div class="note">Не удалось распознать ни одной строки. Проверь формат выше.</div>';
     return;
   }
-  card.style.display='block';
   el.innerHTML = pasteParsed.map((p,i)=>{
     const options = EXERCISES.map(e=>`<option value="${e.name}" ${e.name===p.exercise?'selected':''}>${e.name}</option>`).join('');
     const unmatchedFlag = !p.exercise ? '<span style="color:var(--danger);font-size:10px;">не распознано — выбери вручную</span>' : '';
     return `<div class="stat-card">
-      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
         <input type="checkbox" ${p.include?'checked':''} onchange="pasteParsed[${i}].include=this.checked">
         <input type="date" value="${p.date}" style="background:var(--surface);border:1px solid var(--line);color:var(--text);
           padding:5px 8px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
           onchange="pasteParsed[${i}].date=this.value">
         <select style="background:var(--surface);border:1px solid var(--line);color:var(--text);padding:5px 8px;
-          border-radius:5px;font-size:12px;flex:1;" onchange="pasteParsed[${i}].exercise=this.value">
+          border-radius:5px;font-size:12px;flex:1;min-width:160px;" onchange="pasteParsed[${i}].exercise=this.value">
           ${options}
         </select>
         ${unmatchedFlag}
       </div>
-      <div style="display:flex;gap:6px;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         ${[0,1,2,3].map(si=>`<input type="number" value="${p.sets[si]}" style="width:56px;background:var(--surface);
           border:1px solid var(--line);color:var(--text);padding:5px 6px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:12px;"
           onchange="pasteParsed[${i}].sets[${si}]=this.value">`).join('')}
-        <input type="text" value="${p.notes||''}" placeholder="заметка" style="flex:1;background:var(--surface);
+        <input type="text" value="${p.notes||''}" placeholder="заметка" style="flex:1;min-width:120px;background:var(--surface);
           border:1px solid var(--line);color:var(--text);padding:5px 8px;border-radius:5px;font-size:12px;"
           onchange="pasteParsed[${i}].notes=this.value">
       </div>
@@ -954,7 +1751,7 @@ function commitPaste(){
   });
   saveJournal(journal);
   pasteParsed = [];
-  document.getElementById('pastePreviewCard').style.display='none';
+  document.getElementById('pastePreviewWrap').style.display='none';
   document.getElementById('pasteInput').value='';
   renderJournalList();
   renderDashboard();
@@ -962,10 +1759,150 @@ function commitPaste(){
 }
 
 // ---------------------------------------------------------------------
+// Dashboard / stats
+// ---------------------------------------------------------------------
+function renderDashboard(){
+  const journal = loadJournal();
+  const dates = journal.map(j=>j.date).filter(Boolean).sort();
+  const startDate = dates.length ? dates[0] : new Date().toISOString().slice(0,10);
+  const today = new Date().toISOString().slice(0,10);
+  const weekNum = Math.floor((new Date(today) - new Date(startDate))/(7*86400000)) + 1;
+
+  document.getElementById('dbWeek').textContent = weekNum;
+  document.getElementById('dbSessions').textContent = journal.length;
+  document.getElementById('dbStart').textContent = startDate.split('-').reverse().join('.');
+  document.getElementById('dbToday').textContent = today.split('-').reverse().join('.');
+
+  const chartTypeEl = document.getElementById('chartType');
+  const chartType = chartTypeEl ? chartTypeEl.value : 'volume';
+
+  const weekEntries = {};
+  journal.forEach(j=>{
+    const wk = Math.floor((new Date(j.date) - new Date(startDate))/(7*86400000)) + 1;
+    if(!weekEntries[wk]) weekEntries[wk] = [];
+    weekEntries[wk].push(j);
+  });
+
+  const weekValues = {};
+  Object.keys(weekEntries).forEach(wk=>{
+    const entries = weekEntries[wk];
+    if(chartType==='sessions'){
+      weekValues[wk] = entries.length;
+    } else if(chartType==='variety'){
+      weekValues[wk] = new Set(entries.map(e=>e.exercise)).size;
+    } else if(chartType==='progress'){
+      const pcts = entries.map(e=>{
+        const exDef = EXERCISES.find(x=>x.name===e.exercise);
+        if(!exDef) return null;
+        const target = exDef.finalGoal || (exDef.sets*exDef.max);
+        const total = e.sets.reduce((a,b)=>a+b,0);
+        return target>0 ? Math.min(1, total/target)*100 : null;
+      }).filter(v=>v!==null);
+      weekValues[wk] = pcts.length ? Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length) : 0;
+    } else {
+      weekValues[wk] = entries.reduce((a,e)=>a+e.sets.reduce((x,y)=>x+y,0), 0);
+    }
+  });
+
+  const maxWeek = Math.max(1, ...Object.keys(weekValues).map(Number));
+  const maxVal = Math.max(1, ...Object.values(weekValues));
+  const chartEl = document.getElementById('weekChart');
+  let bars = '';
+  for(let w=1; w<=Math.max(maxWeek,4); w++){
+    const val = weekValues[w]||0;
+    const h = Math.round((val/maxVal)*100);
+    bars += `<div class="bar" style="height:${h}%" title="${val}"><span>Н${w}</span></div>`;
+  }
+  chartEl.innerHTML = bars;
+
+  const statEl = document.getElementById('statList');
+  const progressStyleEl = document.getElementById('progressStyle');
+  const progressStyle = progressStyleEl ? progressStyleEl.value : 'bar';
+
+  function renderProgressViz(pct, totals, target){
+    const pctRound = Math.round(pct*100);
+    if(progressStyle==='ring'){
+      const r = 22, circ = 2*Math.PI*r;
+      const offset = circ*(1-pct);
+      return `<div style="display:flex;align-items:center;gap:12px;">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="6"/>
+          <circle cx="28" cy="28" r="${r}" fill="none" stroke="var(--accent)" stroke-width="6"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+            transform="rotate(-90 28 28)"/>
+          <text x="28" y="32" text-anchor="middle" font-size="12" fill="var(--text)" font-family="IBM Plex Mono, monospace">${pctRound}%</text>
+        </svg>
+      </div>`;
+    }
+    if(progressStyle==='spark'){
+      if(!totals.length) return '<div class="note">Пока нет данных</div>';
+      const last8 = totals.slice(-8);
+      const maxT = Math.max(target, ...last8);
+      const w = 180, h = 40, step = last8.length>1 ? w/(last8.length-1) : 0;
+      const points = last8.map((t,i)=>`${Math.round(i*step)},${Math.round(h-(t/maxT)*h)}`).join(' ');
+      const targetY = Math.round(h-(target/maxT)*h);
+      return `<svg width="${w}" height="${h+6}" viewBox="0 0 ${w} ${h+6}">
+        <line x1="0" y1="${targetY}" x2="${w}" y2="${targetY}" stroke="var(--muted)" stroke-dasharray="3,3" stroke-width="1"/>
+        <polyline points="${points}" fill="none" stroke="var(--steel)" stroke-width="2"/>
+        ${last8.map((t,i)=>`<circle cx="${Math.round(i*step)}" cy="${Math.round(h-(t/maxT)*h)}" r="2.5" fill="var(--accent)"/>`).join('')}
+      </svg>`;
+    }
+    if(progressStyle==='dots'){
+      if(!totals.length) return '<div class="note">Пока нет данных</div>';
+      const last12 = totals.slice(-12);
+      return `<div style="display:flex;gap:5px;flex-wrap:wrap;">${last12.map(t=>{
+        const ok = t/target >= 0.8;
+        const color = ok ? 'var(--good)' : (t/target>=0.4 ? 'var(--accent)' : 'var(--danger)');
+        return `<span title="${t}" style="width:12px;height:12px;border-radius:50%;background:${color};display:inline-block;"></span>`;
+      }).join('')}</div>`;
+    }
+    // default: bar
+    return `<div class="progress-wrap">
+      <div class="progress-gauge"><div class="progress-fill" style="width:${pctRound}%"></div></div>
+      <div class="progress-pct">${pctRound}%</div>
+    </div>`;
+  }
+
+  statEl.innerHTML = EXERCISES.map(e=>{
+    const entries = journal.filter(j=>j.exercise===e.name && j.sets.reduce((a,b)=>a+b,0)>0)
+                            .sort((a,b)=> a.date < b.date ? -1 : 1);
+    const target = e.finalGoal || targetVolume(e);
+    if(!entries.length){
+      return `<div class="stat-card">
+        <div class="name">${e.name}</div>
+        ${renderProgressViz(0, [], target)}
+        <div class="stat-meta"><span>Тренировок: <b>0</b></span><span>Финальная цель: <b>${target}</b></span></div>
+      </div>`;
+    }
+    const totals = entries.map(j=>j.sets.reduce((a,b)=>a+b,0));
+    const last = totals[totals.length-1];
+    const first = totals[0];
+    const best = Math.max(...totals);
+    const avg = Math.round((totals.reduce((a,b)=>a+b,0)/totals.length)*10)/10;
+    const pct = Math.min(1, last/target);
+    const remaining = Math.max(0, target-last);
+    const progress = entries.length>1 ? last-first : null;
+    return `<div class="stat-card">
+      <div class="name">${e.name}</div>
+      ${renderProgressViz(pct, totals, target)}
+      <div class="stat-meta">
+        <span>Последний: <b>${last}</b></span>
+        <span>Финальная цель: <b>${target}</b></span>
+        <span>Осталось: <b>${remaining}</b></span>
+        <span>Тренировок: <b>${entries.length}</b></span>
+        <span>Средний: <b>${avg}</b></span>
+        <span>Лучший: <b>${best}</b></span>
+        ${progress!==null ? `<span>С начала: <b>${progress>=0?'+':''}${progress}</b></span>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ---------------------------------------------------------------------
 // Export / Import
 // ---------------------------------------------------------------------
 function exportData(){
-  const data = { kbju: loadKbju(), journal: loadJournal() };
+  const data = { kbju: loadKbju(), journal: loadJournal(), ingredients: loadIngredients(), dishes: loadDishes(), exercises: EXERCISES, mealLog: loadMealLog() };
   const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -983,9 +1920,18 @@ function importData(event){
       const data = JSON.parse(e.target.result);
       if(data.kbju) saveKbju(data.kbju);
       if(data.journal) saveJournal(data.journal);
+      if(data.ingredients) saveIngredients(data.ingredients);
+      if(data.dishes) saveDishes(data.dishes);
+      if(data.exercises){ saveExercises(data.exercises); EXERCISES = loadExercises(); }
+      if(data.mealLog) saveMealLog(data.mealLog);
       initKbju();
+      renderIngredients();
+      renderDishList();
       renderJournalList();
+      renderReference();
       renderDashboard();
+      currentPlan = [];
+      renderDayPlan();
       alert('Данные импортированы');
     }catch(err){ alert('Не удалось прочитать файл'); }
   };
@@ -996,12 +1942,16 @@ function importData(event){
 // Init
 // ---------------------------------------------------------------------
 initKbju();
+renderProfileTabs();
 renderSchedule();
 renderReference();
 initJournalForm();
 renderJournalList();
+renderIngredients();
+renderDishRows();
+renderDishList();
 renderDashboard();
-initSync();
+renderDayPlan();
 </script>
 </body>
 </html>
