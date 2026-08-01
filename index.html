@@ -408,11 +408,6 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;position:relative;z-index:1;}
 .export-bar{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;position:relative;z-index:1;}
 .tech-note{font-size:12px;color:var(--muted);line-height:1.5;position:relative;z-index:1;}
-.dish-row{display:grid;grid-template-columns:1fr 90px 150px 90px auto;gap:8px;align-items:center;margin-bottom:8px;position:relative;z-index:1;}
-.dish-row select,.dish-row input{background-color:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text);
-  padding:8px 9px;border-radius:8px;font-size:12px;}
-.dish-row select{padding-right:28px;}
-
 /* ---------- ingredient add-form ---------- */
 .ing-table-wrap{overflow-x:auto;}
 .ing-add-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:8px;position:relative;z-index:1;}
@@ -420,7 +415,7 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
   padding:8px 9px;border-radius:8px;font-size:12px;width:100%;min-width:0;}
 .ing-add-grid button{grid-column:1 / -1;}
 
-/* ---------- unified tag select+create combobox ---------- */
+/* ---------- unified tag select+create combobox (opens a portal popover) ---------- */
 .tag-combo{position:relative;z-index:5;}
 .tag-combo-display{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;
   background-color:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:8px;padding:9px 12px;
@@ -430,27 +425,62 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 .tag-combo.has-tags .tag-combo-summary{color:var(--text);}
 .tag-combo-caret{color:var(--muted);font-size:11px;transition:transform .2s ease;flex-shrink:0;}
 .tag-combo.open .tag-combo-caret{transform:rotate(180deg);}
-.tag-combo-panel{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:20;
-  background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), var(--surface2-solid);
-  background-blend-mode:overlay, normal;
-  border:1px solid var(--line);border-radius:12px;padding:12px;
-  box-shadow:0 20px 50px -18px rgba(0,0,0,.75);}
-.tag-combo.open .tag-combo-panel{display:block;animation:fade .18s ease;}
 .tag-combo-new{display:flex;gap:6px;margin-top:10px;}
 .tag-combo-new input{flex:1;min-width:0;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
   padding:7px 10px;border-radius:8px;font-size:12px;}
 
-/* ---------- vertical cooking-method blocks ---------- */
-.cook-block{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:14px 0;
-  background:rgba(255,255,255,.02);position:relative;z-index:1;}
-.cook-block-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
-.cook-block-head select{min-width:190px;flex:1;}
-.cook-arrow{color:var(--accent);font-size:17px;font-weight:700;flex-shrink:0;text-shadow:0 0 10px rgba(232,178,61,.4);}
-.cook-block-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;}
-.cook-block-remove{margin-left:auto;color:var(--danger);font-size:11px;cursor:pointer;flex-shrink:0;white-space:nowrap;}
-.cook-block-ings{display:flex;flex-direction:column;gap:8px;}
-.cook-ing-row{grid-template-columns:1fr 76px 122px 96px auto;}
-.cook-add-ing{margin-top:12px;}
+/* ---------- generic portal popover (used by tag combo + ingredient nodes) ---------- */
+.portal-popover{
+  position:fixed;z-index:999;opacity:0;transform:translateY(-6px);pointer-events:none;
+  transition:opacity .16s ease, transform .16s ease;
+  background:linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.025)), var(--surface2-solid);
+  background-blend-mode:overlay, normal;
+  border:1px solid var(--line);border-radius:12px;padding:14px;
+  box-shadow:0 25px 60px -18px rgba(0,0,0,.8);
+  min-width:220px;max-width:min(320px, calc(100vw - 24px));
+}
+.portal-popover.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.popover-title{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;}
+.popover-ing-select{width:100%;margin-bottom:10px;background-color:rgba(255,255,255,.045);border:1px solid var(--line);
+  color:var(--text);padding:8px 9px;border-radius:8px;font-size:12px;}
+.popover-row{display:flex;gap:6px;margin-bottom:10px;}
+.popover-row input,.popover-row select{flex:1;min-width:0;background-color:rgba(255,255,255,.045);border:1px solid var(--line);
+  color:var(--text);padding:7px 8px;border-radius:8px;font-size:12px;}
+.popover-meta{font-size:11px;color:var(--accent);font-family:'IBM Plex Mono',monospace;}
+
+/* ---------- horizontal ingredient/method chain, single canvas ---------- */
+.dish-canvas-viewport{overflow:auto;border:1px solid var(--line);border-radius:12px;
+  background:rgba(255,255,255,.015);margin:14px 0;padding:14px 12px 18px;position:relative;z-index:1;}
+.chain-row{display:flex;align-items:center;gap:8px;overflow-x:auto;padding:6px 4px 10px;}
+.chain-row::-webkit-scrollbar{height:7px;}
+.chain-row::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+.chain-node{flex-shrink:0;border:1px solid var(--line);border-radius:12px;padding:9px 14px;cursor:pointer;
+  min-width:110px;max-width:160px;text-align:center;user-select:none;
+  background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.015)), var(--surface2-solid);
+  background-blend-mode:overlay, normal;
+  transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;}
+.chain-node:hover{transform:translateY(-2px);border-color:rgba(232,178,61,.45);box-shadow:0 12px 28px -14px rgba(232,178,61,.45);}
+.chain-node .node-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.chain-node .node-sub{font-size:10px;color:var(--accent);margin-top:3px;}
+.chain-node.method-node{cursor:default;background:linear-gradient(160deg, rgba(124,108,255,.12), rgba(124,108,255,.02)), var(--surface2-solid);}
+.chain-node.method-node select{background:transparent;border:none;color:var(--text);font-size:11px;text-align:center;
+  width:100%;cursor:pointer;}
+.chain-arrow{flex-shrink:0;color:var(--accent);font-size:18px;font-weight:700;text-shadow:0 0 10px rgba(232,178,61,.4);}
+.chain-add-node{flex-shrink:0;border:1px dashed var(--line);border-radius:12px;padding:9px 16px;color:var(--muted);
+  cursor:pointer;font-size:18px;line-height:1;background:transparent;transition:all .15s ease;}
+.ing-stack{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.stack-connector{color:var(--accent);font-size:14px;line-height:1;opacity:.85;text-shadow:0 0 8px rgba(232,178,61,.4);}
+.stack-add{border:1px dashed var(--line);border-radius:8px;width:100%;min-width:96px;padding:3px 10px;text-align:center;
+  color:var(--muted);cursor:pointer;font-size:15px;line-height:1.3;transition:all .15s ease;box-sizing:border-box;}
+.stack-add:hover{border-color:var(--accent);color:var(--accent);}
+.chain-add-node:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ---------- Наши блюда: header with always-visible unit toggle ---------- */
+.dish-list-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.unit-toggle{display:flex;align-items:center;gap:8px;}
+.unit-toggle label{font-size:11px;color:var(--muted);white-space:nowrap;}
+.unit-toggle select{background-color:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
+  padding:7px 9px;border-radius:8px;font-size:12px;}
 .dish-card{
   --mx:50%;--my:30%;position:relative;overflow:hidden;
   background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.01)), var(--surface2-solid);
@@ -546,16 +576,12 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
   .entry-form{grid-template-columns:1fr 1fr;}
   .entry-form .btn{grid-column:1 / -1;}
   .journal-row,.journal-row.head{min-width:640px;}
-  .dish-row{grid-template-columns:1fr;}
   h1.page-title{font-size:21px;}
 
   .ing-add-grid{grid-template-columns:1fr 1fr;}
-  .cook-ing-row{grid-template-columns:1fr;gap:6px;}
-  .cook-block-head{flex-wrap:wrap;}
-  .cook-block-head select{min-width:0;width:100%;flex-basis:100%;}
-  .cook-block-remove{margin-left:0;}
-  .cook-block{padding:12px;}
-  .tag-combo-panel{left:0;right:0;}
+  .chain-node{min-width:96px;max-width:130px;padding:8px 10px;}
+  .dish-canvas-viewport{padding:10px 8px 12px;}
+  .dish-list-head{align-items:flex-start;flex-direction:column;}
 }
 
 @media (max-width: 480px){
@@ -688,7 +714,15 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 
       <div class="card">
         <h2>Наши блюда</h2>
-        <button class="btn secondary small" onclick="toggleDishBlock()" id="dishToggleBtn">Показать наши блюда</button>
+        <div class="dish-list-head" style="margin-top:12px;">
+          <button class="btn secondary small" onclick="toggleDishBlock()" id="dishToggleBtn">Показать наши блюда</button>
+          <div class="unit-toggle">
+            <select id="dishUnitMode" onchange="setDishDisplayUnit(this.value)">
+              <option value="g">Граммы</option>
+              <option value="normal">Нормальный (ложки/стаканы)</option>
+            </select>
+          </div>
+        </div>
         <div id="dishBlock" style="display:none;margin-top:16px;">
           <input type="text" id="dishSearch" placeholder="Поиск блюда по названию или тегу…" oninput="renderDishList()"
             style="width:100%;margin-bottom:14px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
@@ -730,25 +764,19 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
           <div class="field" style="flex:1;min-width:240px;margin:0;">
             <label>Теги (для папок в «Наших блюдах»)</label>
             <div class="tag-combo" id="tagCombo">
-              <div class="tag-combo-display" onclick="toggleTagDropdown(event)">
+              <div class="tag-combo-display" id="tagComboDisplay" onclick="toggleTagDropdown(event)">
                 <span id="tagComboSummary" class="tag-combo-summary">Выбери или создай тег…</span>
                 <span class="tag-combo-caret">▾</span>
-              </div>
-              <div class="tag-combo-panel" id="tagComboPanel">
-                <div id="dishTagChips" class="tag-chip-row"></div>
-                <div class="tag-combo-new">
-                  <input type="text" id="newTagInput" placeholder="+ создать новый тег…"
-                    onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDishTag();}">
-                  <button class="btn secondary small" onclick="addCustomDishTag()">Создать</button>
-                </div>
               </div>
             </div>
             <input type="hidden" id="dishTags" value="">
           </div>
         </div>
 
-        <div id="dishBlocks"></div>
-        <button class="btn secondary small" onclick="addDishBlock()" style="margin-top:4px;">+ Добавить способ готовки</button>
+        <div class="note" style="margin-top:14px;">Строй блюдо как цепочку: ингредиент → способ готовки → ингредиент → способ готовки и т.д. Нажми на ингредиент, чтобы задать граммовку и цену. Кнопка «+» под ингредиентом добавляет ещё один ингредиент ниже, в ту же цепочку (например, если два продукта готовятся вместе одним способом).</div>
+        <div class="dish-canvas-viewport" id="dishCanvasViewport">
+          <div id="dishChains"></div>
+        </div>
 
         <div class="stat-card" style="margin-top:16px;">
           <div class="pill-row">
@@ -921,7 +949,9 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
             <option value="6">Суббота</option>
             <option value="0">Воскресенье</option>
           </select>
+          <button class="btn secondary small" id="journalShowAllBtn" onclick="toggleJournalShowAll()">Показать всё</button>
         </div>
+        <div class="note" id="journalModeNote" style="margin-top:6px;"></div>
         <div class="journal-table-wrap">
         <div class="journal-row head">
           <div>Дата</div><div>День</div><div>Упражнение</div><div>П1</div><div>П2</div><div>П3</div><div>П4</div><div>Итого</div><div>Заметки</div><div></div>
@@ -1894,7 +1924,7 @@ function ferrumEasterEgg(e){
   void toast.offsetWidth;
   toast.classList.add('show');
   clearTimeout(toast._hideTimer);
-  toast._hideTimer = setTimeout(()=>toast.classList.remove('show'), 3600);
+  toast._hideTimer = setTimeout(()=>toast.classList.remove('show'), 7000);
 }
 
 // ---------------------------------------------------------------------
@@ -2181,13 +2211,95 @@ function ingredientPricePer100(ing){
 }
 
 // ---------------------------------------------------------------------
-// Dish constructor — cooking-method blocks, each holding a vertical
-// stack of ingredient rows (block: способ готовки -> ингредиенты)
+// "Нормальные" единицы измерения — используются в «Наших блюдах», когда
+// включён режим отображения "Нормальный" вместо чистых граммов.
+// Значения ориентировочные (усреднённые по бытовым таблицам мер: вода/
+// сыпучие продукты без горки), точный вес всегда зависит от продукта —
+// поэтому рядом всегда показываем граммы в скобках.
 // ---------------------------------------------------------------------
-function newDishIngredient(){ return {ingredientIndex:0, qty:100, qtyUnit:'g'}; }
-function newDishBlock(){ return {methodIndex:0, items:[newDishIngredient()]}; }
-let dishBlocks = [newDishBlock()];
+const NORMAL_UNITS = [
+  {name:'тарелка', g:350},
+  {name:'половник', g:250},
+  {name:'стакан', g:200},
+  {name:'ст.л.', g:15},
+  {name:'ч.л.', g:5},
+];
+function gramsToNormal(grams){
+  grams = grams||0;
+  if(grams<=0) return '0 г';
+  for(const u of NORMAL_UNITS){
+    if(grams >= u.g){
+      let count = Math.round(grams/u.g*2)/2;
+      const countStr = (count%1===0) ? count.toFixed(0) : count.toFixed(1);
+      return `≈ ${countStr} ${u.name} (${Math.round(grams)} г)`;
+    }
+  }
+  return Math.round(grams)+' г';
+}
+let dishDisplayUnit = localStorage.getItem('zt_dish_unit_mode') || 'g';
+function setDishDisplayUnit(v){
+  dishDisplayUnit = v;
+  localStorage.setItem('zt_dish_unit_mode', v);
+  renderDishList();
+}
+function formatDishWeight(grams){
+  return dishDisplayUnit==='normal' ? gramsToNormal(grams) : Math.round(grams)+' г';
+}
 
+// ---------------------------------------------------------------------
+// Generic portal popover — appended to <body> so it's never clipped by
+// a parent card's overflow:hidden or a horizontally-scrolling chain row.
+// ---------------------------------------------------------------------
+function closePortalPopover(){
+  const pop = document.getElementById('activePortalPopover');
+  if(!pop) return;
+  if(pop._reposition){
+    window.removeEventListener('scroll', pop._reposition, true);
+    window.removeEventListener('resize', pop._reposition);
+  }
+  document.removeEventListener('click', portalOutsideClick, true);
+  pop.remove();
+}
+function portalOutsideClick(e){
+  const pop = document.getElementById('activePortalPopover');
+  if(!pop) return;
+  if(pop.contains(e.target) || (pop._anchor && pop._anchor.contains(e.target))) return;
+  closePortalPopover();
+}
+function positionPortalPopover(anchorEl, pop){
+  const r = anchorEl.getBoundingClientRect();
+  const pr = pop.getBoundingClientRect();
+  let top = r.bottom + 8;
+  let left = r.left;
+  if(left + pr.width > window.innerWidth - 8) left = window.innerWidth - pr.width - 8;
+  if(left < 8) left = 8;
+  if(top + pr.height > window.innerHeight - 8) top = r.top - pr.height - 8;
+  if(top < 8) top = 8;
+  pop.style.top = top+'px';
+  pop.style.left = left+'px';
+}
+function openPortalPopover(anchorEl, html){
+  closePortalPopover();
+  const pop = document.createElement('div');
+  pop.className = 'portal-popover';
+  pop.id = 'activePortalPopover';
+  pop.innerHTML = html;
+  document.body.appendChild(pop);
+  positionPortalPopover(anchorEl, pop);
+  requestAnimationFrame(()=>pop.classList.add('show'));
+  const reposition = ()=>positionPortalPopover(anchorEl, pop);
+  window.addEventListener('scroll', reposition, true);
+  window.addEventListener('resize', reposition);
+  pop._reposition = reposition;
+  pop._anchor = anchorEl;
+  setTimeout(()=>document.addEventListener('click', portalOutsideClick, true), 0);
+  return pop;
+}
+
+// ---------------------------------------------------------------------
+// Unified tag select + create combobox (opens as a portal popover —
+// fixes it being invisible/clipped inside an overflow:hidden card)
+// ---------------------------------------------------------------------
 const LS_DISH_TAG_OPTIONS = "zt_dish_tag_options";
 function loadDishTagOptions(){
   const raw = localStorage.getItem(LS_DISH_TAG_OPTIONS);
@@ -2196,13 +2308,37 @@ function loadDishTagOptions(){
 function saveDishTagOptions(arr){ localStorage.setItem(LS_DISH_TAG_OPTIONS, JSON.stringify(arr)); }
 let selectedDishTags = [];
 
-// -------- unified tag select + create combobox --------
-function renderDishTagChips(){
+function tagPopoverHtml(){
   const options = loadDishTagOptions();
-  const el = document.getElementById('dishTagChips');
-  if(!el) return;
-  el.innerHTML = options.map(t=>`<span class="tag-chip ${selectedDishTags.includes(t)?'active':''}"
-    onclick="toggleDishTagChip('${t.replace(/'/g,"\\'")}')">${t}</span>`).join('');
+  return `<div id="dishTagChips" class="tag-chip-row">${options.map(t=>`<span class="tag-chip ${selectedDishTags.includes(t)?'active':''}"
+      onclick="toggleDishTagChip('${t.replace(/'/g,"\\'")}')">${t}</span>`).join('')}</div>
+    <div class="tag-combo-new">
+      <input type="text" id="newTagInput" placeholder="+ создать новый тег…"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDishTag();}">
+      <button class="btn secondary small" onclick="addCustomDishTag()">Создать</button>
+    </div>`;
+}
+function toggleTagDropdown(e){
+  if(e) e.stopPropagation();
+  const combo = document.getElementById('tagCombo');
+  if(combo.classList.contains('open')){
+    closePortalPopover();
+    combo.classList.remove('open');
+    return;
+  }
+  const anchor = document.getElementById('tagComboDisplay');
+  combo.classList.add('open');
+  const pop = openPortalPopover(anchor, tagPopoverHtml());
+  // make sure the caret flips back when this particular popover closes
+  const obs = new MutationObserver(()=>{
+    if(!document.body.contains(pop)){
+      combo.classList.remove('open');
+      obs.disconnect();
+    }
+  });
+  obs.observe(document.body, {childList:true});
+}
+function renderDishTagChips(){
   const hidden = document.getElementById('dishTags');
   if(hidden) hidden.value = selectedDishTags.join(', ');
   const combo = document.getElementById('tagCombo');
@@ -2210,6 +2346,13 @@ function renderDishTagChips(){
   if(combo && summary){
     combo.classList.toggle('has-tags', selectedDishTags.length>0);
     summary.textContent = selectedDishTags.length ? selectedDishTags.join(', ') : 'Выбери или создай тег…';
+  }
+  // if the popover is currently open, refresh its chip list in place
+  const chipsEl = document.getElementById('dishTagChips');
+  if(chipsEl){
+    const options = loadDishTagOptions();
+    chipsEl.innerHTML = options.map(t=>`<span class="tag-chip ${selectedDishTags.includes(t)?'active':''}"
+      onclick="toggleDishTagChip('${t.replace(/'/g,"\\'")}')">${t}</span>`).join('');
   }
 }
 function toggleDishTagChip(t){
@@ -2228,84 +2371,149 @@ function addCustomDishTag(){
   input.focus();
   renderDishTagChips();
 }
-function toggleTagDropdown(e){
-  if(e) e.stopPropagation();
-  document.getElementById('tagCombo').classList.toggle('open');
-}
-document.addEventListener('click', (e)=>{
-  const combo = document.getElementById('tagCombo');
-  if(combo && combo.classList.contains('open') && !combo.contains(e.target)){
-    combo.classList.remove('open');
-  }
-});
 
 function refreshDishIngredientOptions(){
-  renderDishBlocks();
+  renderDishChains();
 }
 
-function addDishBlock(){
-  dishBlocks.push(newDishBlock());
-  renderDishBlocks();
+// ---------------------------------------------------------------------
+// Dish constructor — horizontal chains (Ingredient -> Method -> Ingredient
+// -> Method -> ...), several chains stack top to bottom. Clicking an
+// ingredient node opens a popover below it with qty + unit + price.
+// ---------------------------------------------------------------------
+function newIngItem(){ return {ingredientIndex:0, qty:100}; }
+function newIngColumn(){ return {type:'ing', items:[newIngItem()]}; }
+function newMethodColumn(){ return {type:'method', methodIndex:0}; }
+function freshDishColumns(){ return [newIngColumn()]; } // starts (and by default ends) on an ingredient — a trailing
+  // method column is only added when the user explicitly clicks "+", which prevents two method
+  // selects ever appearing back to back.
+let dishColumns = freshDishColumns();
+
+function addColumnPair(){
+  closePortalPopover();
+  dishColumns.push(newMethodColumn(), newIngColumn());
+  renderDishChains();
+  requestAnimationFrame(()=>{
+    const row = document.getElementById('chainRow0');
+    if(row) row.scrollLeft = row.scrollWidth;
+  });
 }
-function removeDishBlock(bi){
-  dishBlocks.splice(bi,1);
-  if(!dishBlocks.length) dishBlocks.push(newDishBlock());
-  renderDishBlocks();
+function addBranchIngredient(ci){
+  closePortalPopover();
+  dishColumns[ci].items.push(newIngItem());
+  renderDishChains();
 }
-function addDishIngredient(bi){
-  dishBlocks[bi].items.push(newDishIngredient());
-  renderDishBlocks();
-}
-function removeDishIngredient(bi, ii){
-  dishBlocks[bi].items.splice(ii,1);
-  if(!dishBlocks[bi].items.length) dishBlocks[bi].items.push(newDishIngredient());
-  renderDishBlocks();
+function removeChainItem(ci, ii){
+  closePortalPopover();
+  dishColumns[ci].items.splice(ii,1);
+  if(!dishColumns[ci].items.length) dishColumns[ci].items.push(newIngItem());
+  renderDishChains();
 }
 
-function renderDishBlocks(){
+function ingNodeLabelHtml(ci, ii){
+  const item = dishColumns[ci].items[ii];
+  const ing = loadIngredients()[item.ingredientIndex];
+  return `<div class="node-name">${ing?ing.name:'—'}</div><div class="node-sub">${formatDishWeight(item.qty||0)}</div>`;
+}
+function updateChainNodeLabel(ci, ii){
+  const nodeEl = document.querySelector(`.ing-node[data-ci="${ci}"][data-ii="${ii}"]`);
+  if(nodeEl) nodeEl.innerHTML = ingNodeLabelHtml(ci, ii);
+}
+function ingredientPopoverHtml(ci, ii){
+  const item = dishColumns[ci].items[ii];
   const ingredients = loadIngredients();
-  const el = document.getElementById('dishBlocks');
-  if(!el) return;
-  el.innerHTML = dishBlocks.map((block,bi)=>{
-    const rowsHtml = block.items.map((item,ii)=>{
-      const ingOpts = ingredients.map((ing,idx)=>`<option value="${idx}" ${idx===item.ingredientIndex?'selected':''}>${ing.name}</option>`).join('');
-      return `<div class="dish-row cook-ing-row">
-        <select onchange="dishBlocks[${bi}].items[${ii}].ingredientIndex=parseInt(this.value);calcDish();">${ingOpts}</select>
-        <input type="number" value="${item.qty}" placeholder="${item.qtyUnit==='g'?'грамм':'шт.'}"
-          onchange="dishBlocks[${bi}].items[${ii}].qty=parseFloat(this.value)||0;calcDish();">
-        <select onchange="dishBlocks[${bi}].items[${ii}].qtyUnit=this.value;renderDishBlocks();">
-          <option value="g" ${item.qtyUnit==='g'?'selected':''}>Грамм</option>
-          <option value="piece" ${item.qtyUnit==='piece'?'selected':''}>Нормальный (шт.)</option>
-        </select>
-        <span class="mono" style="font-size:11px;color:var(--muted);" id="dishItemCooked${bi}_${ii}">—</span>
-        <span style="color:var(--danger);cursor:pointer;text-align:center;" onclick="removeDishIngredient(${bi},${ii})">✕</span>
-      </div>`;
-    }).join('');
-    const methodOpts = COOKING_METHODS.map((m,mi)=>`<option value="${mi}" ${mi===block.methodIndex?'selected':''}>${m.name}</option>`).join('');
-    return `<div class="cook-block">
-      <div class="cook-block-head">
-        <select onchange="dishBlocks[${bi}].methodIndex=parseInt(this.value);calcDish();">${methodOpts}</select>
-        <span class="cook-arrow">→</span>
-        <span class="cook-block-label">ингредиенты</span>
-        ${dishBlocks.length>1?`<span class="cook-block-remove" onclick="removeDishBlock(${bi})">✕ удалить блок</span>`:''}
-      </div>
-      <div class="cook-block-ings">${rowsHtml}</div>
-      <button class="btn secondary small cook-add-ing" onclick="addDishIngredient(${bi})">+ Ингредиент в этот блок</button>
+  const ingOpts = ingredients.map((x,xi)=>`<option value="${xi}" ${xi===item.ingredientIndex?'selected':''}>${x.name}</option>`).join('');
+  return `
+    <div class="popover-title">Ингредиент</div>
+    <select class="popover-ing-select" onchange="onChainIngredientChange(${ci},${ii},this.value)">${ingOpts}</select>
+    <div class="popover-row">
+      <input type="number" value="${item.qty}" oninput="onChainQtyChange(${ci},${ii},this.value)">
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;">г (сырых)</span>
+    </div>
+    <div class="popover-meta" id="popoverMeta">—</div>
+    <button class="btn secondary small" style="margin-top:10px;width:100%;" onclick="removeChainItem(${ci},${ii})">✕ Удалить ингредиент</button>
+  `;
+}
+function updatePopoverMeta(ci, ii){
+  const meta = document.getElementById('popoverMeta');
+  if(!meta) return;
+  const item = dishColumns[ci].items[ii];
+  const ing = loadIngredients()[item.ingredientIndex];
+  const grams = item.qty||0;
+  const cost = grams/100*ingredientPricePer100(ing);
+  meta.textContent = `≈ ${formatDishWeight(grams)} · ${Math.round(cost)} руб`;
+}
+function onChainIngredientChange(ci, ii, val){
+  dishColumns[ci].items[ii].ingredientIndex = parseInt(val);
+  updateChainNodeLabel(ci, ii);
+  updatePopoverMeta(ci, ii);
+  calcDish();
+}
+function onChainQtyChange(ci, ii, val){
+  dishColumns[ci].items[ii].qty = parseFloat(val)||0;
+  updateChainNodeLabel(ci, ii);
+  updatePopoverMeta(ci, ii);
+  calcDish();
+}
+function openIngredientPopover(e, ci, ii){
+  e.stopPropagation();
+  const anchor = e.currentTarget;
+  openPortalPopover(anchor, ingredientPopoverHtml(ci, ii));
+  updatePopoverMeta(ci, ii);
+}
+
+// method mult that governs a given ingredient column: the method column
+// immediately to its right, or "raw" (mult 1) if the chain ends there
+function methodMultAfter(ci){
+  const next = dishColumns[ci+1];
+  if(next && next.type==='method') return COOKING_METHODS[next.methodIndex];
+  return COOKING_METHODS[0];
+}
+
+function columnHtml(col, ci){
+  const methodOptionsHtml = (selectedMi)=>COOKING_METHODS.map((m,mi)=>`<option value="${mi}" ${mi===selectedMi?'selected':''}>${m.name}</option>`).join('');
+  if(col.type==='method'){
+    return `<div class="chain-node method-node">
+      <select onchange="dishColumns[${ci}].methodIndex=parseInt(this.value);calcDish();">${methodOptionsHtml(col.methodIndex)}</select>
     </div>`;
+  }
+  const ingredients = loadIngredients();
+  const stackHtml = col.items.map((item,ii)=>{
+    const ing = ingredients[item.ingredientIndex];
+    const node = `<div class="chain-node ing-node" data-ci="${ci}" data-ii="${ii}" onclick="openIngredientPopover(event,${ci},${ii})">
+      <div class="node-name">${ing?ing.name:'—'}</div><div class="node-sub">${formatDishWeight(item.qty||0)}</div>
+    </div>`;
+    const connector = ii<col.items.length-1 ? `<div class="stack-connector">↓</div>` : '';
+    return node + connector;
   }).join('');
+  return `<div class="ing-stack">
+    ${stackHtml}
+    <div class="stack-add" onclick="addBranchIngredient(${ci})" title="Добавить ингредиент ниже, под текущим">+</div>
+  </div>`;
+}
+
+function renderDishChains(){
+  const el = document.getElementById('dishChains');
+  if(!el) return;
+  const partsHtml = dishColumns.map((col,ci)=> (ci>0?'<span class="chain-arrow">→</span>':'') + columnHtml(col,ci)).join('');
+  el.innerHTML = `<div class="chain-row" id="chainRow0">
+    ${partsHtml}
+    <span class="chain-arrow">→</span>
+    <div class="chain-add-node" onclick="addColumnPair()" title="Добавить способ готовки и ингредиент">+</div>
+  </div>`;
   calcDish();
 }
 
 function calcDish(){
   const ingredients = loadIngredients();
   let rawWeight=0, cookedWeight=0, kcal=0, protein=0, fat=0, carb=0, priceAuto=0;
-  dishBlocks.forEach((block,bi)=>{
-    const mult = COOKING_METHODS[block.methodIndex].mult;
-    block.items.forEach((item,ii)=>{
+  dishColumns.forEach((col,ci)=>{
+    if(col.type!=='ing') return;
+    const mult = methodMultAfter(ci).mult;
+    col.items.forEach(item=>{
       const ing = ingredients[item.ingredientIndex];
       if(!ing) return;
-      const qty = item.qty||0;
-      const grams = item.qtyUnit==='piece' ? qty*(ing.pieceWeight||100) : qty;
+      const grams = item.qty||0;
       const cooked = grams*mult;
       rawWeight += grams;
       cookedWeight += cooked;
@@ -2314,12 +2522,10 @@ function calcDish(){
       fat += grams/100*ing.fat;
       carb += grams/100*ing.carb;
       priceAuto += grams/100*ingredientPricePer100(ing);
-      const cell = document.getElementById(`dishItemCooked${bi}_${ii}`);
-      if(cell) cell.textContent = Math.round(cooked)+' г готово';
     });
   });
-  document.getElementById('dishRawWeight').textContent = Math.round(rawWeight)+' г';
-  document.getElementById('dishCookedWeight').textContent = Math.round(cookedWeight)+' г';
+  document.getElementById('dishRawWeight').textContent = formatDishWeight(rawWeight);
+  document.getElementById('dishCookedWeight').textContent = formatDishWeight(cookedWeight);
   document.getElementById('dishKcal').textContent = Math.round(kcal);
   document.getElementById('dishProtein').textContent = Math.round(protein*10)/10+' г';
   document.getElementById('dishFat').textContent = Math.round(fat*10)/10+' г';
@@ -2336,10 +2542,22 @@ function saveDish(){
   const tagsRaw = document.getElementById('dishTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
 
+  const ingredients = loadIngredients();
+  const composition = [];
+  dishColumns.forEach((col,ci)=>{
+    if(col.type!=='ing') return;
+    const methodName = methodMultAfter(ci).name;
+    col.items.forEach(item=>{
+      const ing = ingredients[item.ingredientIndex];
+      if(!ing) return;
+      composition.push({name:ing.name, rawGrams:Math.round(item.qty||0), method:methodName});
+    });
+  });
+
   const dishes = loadDishes();
   const id = dishes.length ? Math.max(...dishes.map(d=>d.id))+1 : 1;
   dishes.push({
-    id, name, tags, favorite:'none',
+    id, name, tags, favorite:'none', composition,
     rawWeight: Math.round(totals.rawWeight),
     cookedWeight: Math.round(totals.cookedWeight),
     kcal: Math.round(totals.kcal),
@@ -2354,8 +2572,8 @@ function saveDish(){
   document.getElementById('dishTags').value='';
   selectedDishTags = [];
   renderDishTagChips();
-  dishBlocks = [newDishBlock()];
-  renderDishBlocks();
+  dishColumns = freshDishColumns();
+  renderDishChains();
   renderDishList();
 }
 
@@ -2479,6 +2697,13 @@ function dishCardHtml(d){
     fat: Math.round(d.fat/d.cookedWeight*100*10)/10,
     carb: Math.round(d.carb/d.cookedWeight*100*10)/10,
   } : {kcal:0,protein:0,fat:0,carb:0};
+  const compositionHtml = (d.composition && d.composition.length) ? `
+    <details style="margin-top:8px;">
+      <summary style="cursor:pointer;font-size:11px;color:var(--muted);">Состав (${d.composition.length})</summary>
+      <div class="note" style="margin-top:6px;">
+        ${d.composition.map(c=>`${c.name} — <b>${formatDishWeight(c.rawGrams)}</b>${c.method && c.method.indexOf('Без обработки')===-1 ? ' · '+c.method : ''}`).join('<br>')}
+      </div>
+    </details>` : '';
   return `<div class="dish-card">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
       <div class="name">${d.name}</div>
@@ -2488,7 +2713,7 @@ function dishCardHtml(d){
       </div>
     </div>
     <div class="pill-row">
-      <span>Вес готового: <b>${d.cookedWeight} г</b></span>
+      <span>Вес готового: <b>${formatDishWeight(d.cookedWeight)}</b></span>
       <span>Цена: <b>${d.price} руб</b></span>
     </div>
     <div class="pill-row" style="margin-top:6px;">
@@ -2497,6 +2722,7 @@ function dishCardHtml(d){
     <div class="pill-row" style="margin-top:6px;">
       <span>На 100г: <b>${per100.kcal} ккал</b> / Б <b>${per100.protein}</b> / Ж <b>${per100.fat}</b> / У <b>${per100.carb}</b></span>
     </div>
+    ${compositionHtml}
     ${dishRatingsHtml(d)}
   </div>`;
 }
@@ -2664,6 +2890,11 @@ function updateEntryNotes(id, value){
   saveJournal(journal);
 }
 
+let journalShowAll = false;
+function toggleJournalShowAll(){
+  journalShowAll = !journalShowAll;
+  renderJournalList();
+}
 function renderJournalList(){
   const journal = loadJournal().slice().sort((a,b)=> a.date < b.date ? 1 : -1);
   const filter = document.getElementById('filterExercise').value;
@@ -2677,9 +2908,18 @@ function renderJournalList(){
       return isoDate.toLowerCase().includes(dateQuery) || ruDate.toLowerCase().includes(dateQuery);
     });
   }
-  if(weekdayFilter!==''){
+  const todayWeekday = String(new Date().getDay());
+  if(!journalShowAll){
+    filtered = filtered.filter(j=> String(new Date(j.date+"T00:00:00").getDay()) === todayWeekday);
+  } else if(weekdayFilter!==''){
     filtered = filtered.filter(j=> String(new Date(j.date+"T00:00:00").getDay()) === weekdayFilter);
   }
+  const btn = document.getElementById('journalShowAllBtn');
+  if(btn) btn.textContent = journalShowAll ? 'Показать только сегодня' : 'Показать всё';
+  const modeNote = document.getElementById('journalModeNote');
+  if(modeNote) modeNote.textContent = journalShowAll
+    ? ''
+    : `Показаны записи только за ${weekdayName(new Date().toISOString().slice(0,10))} — нажми «Показать всё», чтобы увидеть остальные дни.`;
   const el = document.getElementById('journalList');
   if(!filtered.length){ el.innerHTML = '<div class="note">Ничего не найдено</div>'; return; }
 
@@ -3199,8 +3439,10 @@ renderReference();
 initJournalForm();
 renderJournalList();
 renderIngredients();
-renderDishBlocks();
+renderDishChains();
 renderDishTagChips();
+const dishUnitModeEl = document.getElementById('dishUnitMode');
+if(dishUnitModeEl) dishUnitModeEl.value = dishDisplayUnit;
 renderDishList();
 renderVitalsCharts();
 renderDashboard();
