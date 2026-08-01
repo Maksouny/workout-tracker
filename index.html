@@ -343,6 +343,20 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 .top-stats-small .box{padding:11px;}
 .top-stats-small .box .n{font-size:16px;}
 .top-stats-small .box .l{font-size:9px;}
+.stat-strip{display:flex;margin-bottom:22px;border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:linear-gradient(90deg, rgba(232,178,61,.09), rgba(63,214,208,.06));overflow:hidden;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset;animation:cardIn .35s var(--ease);}
+.stat-chip{flex:1;display:flex;align-items:baseline;justify-content:center;gap:8px;padding:11px 14px;
+  border-right:1px solid var(--line-soft);}
+.stat-chip:last-child{border-right:none;}
+.stat-chip-n{font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--accent);font-weight:600;
+  text-shadow:0 0 12px rgba(232,178,61,.35);}
+.stat-chip-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+@media (max-width:860px){
+  .stat-strip{flex-direction:column;}
+  .stat-chip{border-right:none;border-bottom:1px solid var(--line-soft);}
+  .stat-chip:last-child{border-bottom:none;}
+}
 .chart{display:flex;align-items:flex-end;gap:5px;height:140px;padding-top:10px;}
 .chart .bar{flex:1;background:linear-gradient(180deg,var(--accent),var(--accent2) 130%);border-radius:6px 6px 2px 2px;position:relative;min-height:2px;
   box-shadow:0 0 16px -4px rgba(232,178,61,.55);transition:height .5s var(--ease), filter .2s ease;animation:barGrow .6s var(--ease);}
@@ -631,13 +645,10 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
         </div>
       </div>
 
-      <div class="card">
-        <h2>Статистика</h2>
-        <div class="top-stats top-stats-small">
-          <div class="box"><div class="n" id="dbWeek">—</div><div class="l">Неделя программы</div></div>
-          <div class="box"><div class="n" id="dbSessions">—</div><div class="l">Тренировок записано</div></div>
-          <div class="box"><div class="n" id="dbDishes">—</div><div class="l">Количество блюд</div></div>
-        </div>
+      <div class="stat-strip">
+        <div class="stat-chip"><span class="stat-chip-n" id="dbWeek">—</span><span class="stat-chip-l">Неделя программы</span></div>
+        <div class="stat-chip"><span class="stat-chip-n" id="dbSessions">—</span><span class="stat-chip-l">Тренировок записано</span></div>
+        <div class="stat-chip"><span class="stat-chip-n" id="dbDishes">—</span><span class="stat-chip-l">Количество блюд</span></div>
       </div>
 
       <div class="card">
@@ -949,7 +960,6 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
             <option value="6">Суббота</option>
             <option value="0">Воскресенье</option>
           </select>
-          <button class="btn secondary small" id="journalShowAllBtn" onclick="toggleJournalShowAll()">Показать всё</button>
         </div>
         <div class="note" id="journalModeNote" style="margin-top:6px;"></div>
         <div class="journal-table-wrap">
@@ -957,6 +967,9 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
           <div>Дата</div><div>День</div><div>Упражнение</div><div>П1</div><div>П2</div><div>П3</div><div>П4</div><div>Итого</div><div>Заметки</div><div></div>
         </div>
         <div id="journalList"></div>
+        </div>
+        <div style="margin-top:14px;text-align:center;">
+          <button class="btn secondary small" id="journalShowAllBtn" onclick="toggleJournalShowAll()">Показать всё</button>
         </div>
       </div>
 
@@ -2231,7 +2244,7 @@ function gramsToNormal(grams){
     if(grams >= u.g){
       let count = Math.round(grams/u.g*2)/2;
       const countStr = (count%1===0) ? count.toFixed(0) : count.toFixed(1);
-      return `≈ ${countStr} ${u.name} (${Math.round(grams)} г)`;
+      return `≈ ${countStr} ${u.name}`;
     }
   }
   return Math.round(grams)+' г';
@@ -2241,6 +2254,8 @@ function setDishDisplayUnit(v){
   dishDisplayUnit = v;
   localStorage.setItem('zt_dish_unit_mode', v);
   renderDishList();
+  if(typeof renderDishChains==='function') renderDishChains();
+  if(typeof calcDish==='function') calcDish();
 }
 function formatDishWeight(grams){
   return dishDisplayUnit==='normal' ? gramsToNormal(grams) : Math.round(grams)+' г';
@@ -2441,7 +2456,7 @@ function updatePopoverMeta(ci, ii){
   const ing = loadIngredients()[item.ingredientIndex];
   const grams = item.qty||0;
   const cost = grams/100*ingredientPricePer100(ing);
-  meta.textContent = `≈ ${formatDishWeight(grams)} · ${Math.round(cost)} руб`;
+  meta.textContent = `${formatDishWeight(grams)} · ${Math.round(cost)} руб`;
 }
 function onChainIngredientChange(ci, ii, val){
   dishColumns[ci].items[ii].ingredientIndex = parseInt(val);
