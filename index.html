@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тренировочный журнал</title>
+<title>Железо</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Железо">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -82,6 +92,36 @@ nav .brand .disp{
   display:inline-block;
 }
 nav .brand .sub{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.03em;}
+.brand-mark{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:transform .2s var(--ease);}
+.brand-mark:hover{transform:scale(1.03);}
+.brand-mark:active{transform:scale(.94) rotate(-2deg);}
+.brand-mark img{width:26px;height:26px;border-radius:6px;flex-shrink:0;
+  filter:drop-shadow(0 0 8px rgba(232,178,61,.35));}
+.topbar .brand-mark img{width:24px;height:24px;}
+.topbar .brand-mark{gap:8px;}
+
+/* ---------- easter egg toast ---------- */
+.ferrum-toast{
+  position:fixed;left:50%;bottom:28px;z-index:500;
+  transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;
+  background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), var(--surface-solid);
+  background-blend-mode:overlay, normal;
+  border:1px solid rgba(232,178,61,.35);border-radius:14px;
+  padding:14px 20px;max-width:min(420px, calc(100vw - 32px));
+  box-shadow:0 20px 60px rgba(0,0,0,.6), 0 0 40px -14px rgba(232,178,61,.35);
+  font-size:13px;line-height:1.5;text-align:center;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
+}
+.ferrum-toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+.ferrum-toast b{color:var(--accent);}
+@keyframes ferrumShake{
+  0%,100%{transform:translateX(0) rotate(0);}
+  20%{transform:translateX(-3px) rotate(-1deg);}
+  40%{transform:translateX(3px) rotate(1deg);}
+  60%{transform:translateX(-2px) rotate(-.5deg);}
+  80%{transform:translateX(2px) rotate(.5deg);}
+}
+.ferrum-shake{animation:ferrumShake .4s ease;}
 .nav-list{position:relative;padding:2px 10px;}
 .nav-pill{
   position:absolute;left:10px;right:10px;top:0;height:0;z-index:0;pointer-events:none;
@@ -323,8 +363,10 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 .cal-grid.year-grid .cal-cell{aspect-ratio:1.5/1;border-radius:10px;}
 .cal-cell.pad{visibility:hidden;animation:none;}
 .cal-cell:hover{transform:translateY(-2px);background:rgba(255,255,255,.055);}
-.cal-ring{position:absolute;inset:0;overflow:hidden;}
-.cal-grid.month-grid .cal-ring,.cal-grid.year-grid .cal-ring{inset:clamp(5px,1vw,14px);}
+.cal-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  height:76%;aspect-ratio:1;width:auto;overflow:visible;}
+.cal-grid.month-grid .cal-ring{height:70%;}
+.cal-grid.year-grid .cal-ring{height:62%;}
 .cal-daynum{position:relative;z-index:1;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;}
 .cal-grid.month-grid .cal-daynum{font-size:clamp(11px,1.7vw,19px);}
 .cal-grid.year-grid .cal-daynum{font-size:clamp(10px,1.5vw,16px);text-transform:uppercase;letter-spacing:.03em;}
@@ -336,6 +378,33 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
   background:var(--accent);box-shadow:0 0 6px 1px rgba(232,178,61,.8);z-index:1;}
 .cal-grid.year-grid .cal-cell.today::after{display:none;}
 .cal-legend{font-size:11px;color:var(--muted);}
+.cal-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:4px;}
+.cal-nav-btn{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--text);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;flex-shrink:0;}
+.cal-nav-btn:hover{background:rgba(232,178,61,.14);border-color:rgba(232,178,61,.4);transform:translateY(-1px);}
+.cal-nav-label{font-family:'Oswald',sans-serif;letter-spacing:.04em;text-transform:uppercase;font-size:14px;min-width:150px;text-align:center;}
+.cal-nav-today{font-size:10px;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:2px;flex-shrink:0;}
+.cal-nav-today:hover{color:var(--accent);}
+
+.rating-grid{display:grid;grid-template-columns:auto 1fr;gap:7px 12px;font-size:11px;color:var(--muted);align-items:center;}
+.star-rate{display:inline-flex;gap:2px;}
+.star-rate .star{cursor:pointer;color:var(--line);font-size:15px;line-height:1;transition:color .15s ease,transform .15s ease;}
+.star-rate .star:hover{transform:scale(1.2);}
+.star-rate .star.filled{color:var(--accent);text-shadow:0 0 6px rgba(232,178,61,.55);}
+.rating-toggle summary{cursor:pointer;font-size:11px;color:var(--muted);list-style:none;user-select:none;}
+.rating-toggle summary::-webkit-details-marker{display:none;}
+.rating-toggle summary::before{content:"☆ ";}
+.rating-toggle[open] summary::before{content:"★ ";color:var(--accent);}
+.rating-toggle{margin-top:8px;}
+.rating-avg{font-family:'IBM Plex Mono',monospace;color:var(--accent);font-weight:600;}
+.tag-chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+.tag-chip{display:inline-flex;align-items:center;padding:5px 12px;border-radius:20px;font-size:11px;text-transform:uppercase;
+  letter-spacing:.03em;font-weight:600;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid var(--line);
+  color:var(--muted);transition:all .15s ease;user-select:none;}
+.tag-chip:hover{border-color:rgba(232,178,61,.4);color:var(--text);}
+.tag-chip.active{background:rgba(232,178,61,.16);color:var(--accent);border-color:rgba(232,178,61,.5);
+  box-shadow:0 0 12px -3px rgba(232,178,61,.5);}
 .note{font-size:12px;color:var(--muted);line-height:1.5;margin-top:6px;position:relative;z-index:1;}
 .export-bar{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;position:relative;z-index:1;}
 .tech-note{font-size:12px;color:var(--muted);line-height:1.5;position:relative;z-index:1;}
@@ -343,6 +412,45 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 .dish-row select,.dish-row input{background-color:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text);
   padding:8px 9px;border-radius:8px;font-size:12px;}
 .dish-row select{padding-right:28px;}
+
+/* ---------- ingredient add-form ---------- */
+.ing-table-wrap{overflow-x:auto;}
+.ing-add-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;gap:8px;position:relative;z-index:1;}
+.ing-add-grid input{background-color:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--text);
+  padding:8px 9px;border-radius:8px;font-size:12px;width:100%;min-width:0;}
+.ing-add-grid button{grid-column:1 / -1;}
+
+/* ---------- unified tag select+create combobox ---------- */
+.tag-combo{position:relative;z-index:5;}
+.tag-combo-display{display:flex;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;
+  background-color:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:8px;padding:9px 12px;
+  font-size:13px;color:var(--text);transition:border-color .2s ease;user-select:none;}
+.tag-combo-display:hover{border-color:rgba(232,178,61,.4);}
+.tag-combo-summary{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tag-combo.has-tags .tag-combo-summary{color:var(--text);}
+.tag-combo-caret{color:var(--muted);font-size:11px;transition:transform .2s ease;flex-shrink:0;}
+.tag-combo.open .tag-combo-caret{transform:rotate(180deg);}
+.tag-combo-panel{display:none;position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:20;
+  background:linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.02)), var(--surface2-solid);
+  background-blend-mode:overlay, normal;
+  border:1px solid var(--line);border-radius:12px;padding:12px;
+  box-shadow:0 20px 50px -18px rgba(0,0,0,.75);}
+.tag-combo.open .tag-combo-panel{display:block;animation:fade .18s ease;}
+.tag-combo-new{display:flex;gap:6px;margin-top:10px;}
+.tag-combo-new input{flex:1;min-width:0;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
+  padding:7px 10px;border-radius:8px;font-size:12px;}
+
+/* ---------- vertical cooking-method blocks ---------- */
+.cook-block{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:14px 0;
+  background:rgba(255,255,255,.02);position:relative;z-index:1;}
+.cook-block-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.cook-block-head select{min-width:190px;flex:1;}
+.cook-arrow{color:var(--accent);font-size:17px;font-weight:700;flex-shrink:0;text-shadow:0 0 10px rgba(232,178,61,.4);}
+.cook-block-label{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;}
+.cook-block-remove{margin-left:auto;color:var(--danger);font-size:11px;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.cook-block-ings{display:flex;flex-direction:column;gap:8px;}
+.cook-ing-row{grid-template-columns:1fr 76px 122px 96px auto;}
+.cook-add-ing{margin-top:12px;}
 .dish-card{
   --mx:50%;--my:30%;position:relative;overflow:hidden;
   background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.01)), var(--surface2-solid);
@@ -440,6 +548,19 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
   .journal-row,.journal-row.head{min-width:640px;}
   .dish-row{grid-template-columns:1fr;}
   h1.page-title{font-size:21px;}
+
+  .ing-add-grid{grid-template-columns:1fr 1fr;}
+  .cook-ing-row{grid-template-columns:1fr;gap:6px;}
+  .cook-block-head{flex-wrap:wrap;}
+  .cook-block-head select{min-width:0;width:100%;flex-basis:100%;}
+  .cook-block-remove{margin-left:0;}
+  .cook-block{padding:12px;}
+  .tag-combo-panel{left:0;right:0;}
+}
+
+@media (max-width: 480px){
+  .ing-add-grid{grid-template-columns:1fr;}
+  nav .brand .disp{font-size:18px;}
 }
 
 </style>
@@ -449,12 +570,15 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
 <div id="app">
   <div class="topbar">
     <div class="hamburger" onclick="toggleNav()"><span></span></div>
-    <div class="disp">Železo</div>
+    <div class="brand-mark" onclick="ferrumEasterEgg(event)"><img src="icon-192.png" alt=""><span class="disp">Железо</span></div>
   </div>
   <div class="overlay" id="overlay" onclick="closeNav()"></div>
   <nav id="mainNav">
     <div class="brand">
-      <div class="disp">Železo</div>
+      <div class="brand-mark" onclick="ferrumEasterEgg(event)" title="?">
+        <img src="icon-192.png" alt="">
+        <div class="disp">Железо</div>
+      </div>
       <div class="sub">трекер / калькулятор</div>
     </div>
     <div class="nav-list">
@@ -566,6 +690,9 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
         <h2>Наши блюда</h2>
         <button class="btn secondary small" onclick="toggleDishBlock()" id="dishToggleBtn">Показать наши блюда</button>
         <div id="dishBlock" style="display:none;margin-top:16px;">
+          <input type="text" id="dishSearch" placeholder="Поиск блюда по названию или тегу…" oninput="renderDishList()"
+            style="width:100%;margin-bottom:14px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
+            padding:10px 12px;border-radius:8px;font-size:13px;">
           <div id="dishList"></div>
         </div>
       </div>
@@ -575,26 +702,53 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
         <button class="btn secondary small" onclick="toggleIngredientBlock()" id="ingToggleBtn">Показать список ингредиентов</button>
 
         <div id="ingredientBlock" style="display:none;margin-top:16px;">
-          <table>
-            <thead><tr><th>Название</th><th>Ккал/100г</th><th>Белки</th><th>Жиры</th><th>Углеводы</th><th>Цена/100г</th><th></th></tr></thead>
-            <tbody id="ingredientTable"></tbody>
-          </table>
-          <div class="note" style="margin-top:10px;">Добавь свой ингредиент, если его нет в списке:</div>
-          <div class="dish-row" style="grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr auto;margin-top:8px;">
+          <input type="text" id="ingredientSearch" placeholder="Поиск ингредиента по названию…" oninput="renderIngredients()"
+            style="width:100%;margin-bottom:12px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
+            padding:10px 12px;border-radius:8px;font-size:13px;">
+          <div class="ing-table-wrap">
+            <table>
+              <thead><tr><th>Название</th><th>Ккал/100г</th><th>Белки</th><th>Жиры</th><th>Углеводы</th><th>Цена/100г</th><th>Вес 1 шт</th><th>Цена/шт</th><th></th></tr></thead>
+              <tbody id="ingredientTable"></tbody>
+            </table>
+          </div>
+          <div class="note" style="margin-top:10px;">Добавь свой ингредиент, если его нет в списке. Грамовка и цена за штуку — необязательные, нужны, если хочешь считать этот ингредиент поштучно (например яйца, ломтики хлеба):</div>
+          <div class="ing-add-grid" style="margin-top:8px;">
             <input type="text" id="newIngName" placeholder="Название">
             <input type="number" id="newIngKcal" placeholder="Ккал/100г">
             <input type="number" id="newIngProtein" placeholder="Белки/100г">
             <input type="number" id="newIngFat" placeholder="Жиры/100г">
             <input type="number" id="newIngCarb" placeholder="Углеводы/100г">
             <input type="number" id="newIngPrice" placeholder="Цена/100г">
+            <input type="number" id="newIngPieceWeight" placeholder="Вес 1 шт, г (необяз.)">
+            <input type="number" id="newIngPiecePrice" placeholder="Цена за 1 шт (необяз.)">
             <button class="btn small" onclick="addIngredient()">Добавить</button>
           </div>
         </div>
 
-        <div class="field" style="margin-top:16px;"><label>Название блюда</label><input type="text" id="dishName" placeholder="например: Гречка с сосиской"></div>
-        <div class="field"><label>Теги через запятую (для папок в «Наших блюдах»)</label><input type="text" id="dishTags" placeholder="завтрак, быстро"></div>
-        <div id="dishRows"></div>
-        <button class="btn secondary small" onclick="addDishRow()">+ Добавить ингредиент</button>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:16px;">
+          <div class="field" style="flex:2;min-width:220px;margin:0;"><label>Название блюда</label><input type="text" id="dishName" placeholder="например: Гречка с сосиской"></div>
+          <div class="field" style="flex:1;min-width:240px;margin:0;">
+            <label>Теги (для папок в «Наших блюдах»)</label>
+            <div class="tag-combo" id="tagCombo">
+              <div class="tag-combo-display" onclick="toggleTagDropdown(event)">
+                <span id="tagComboSummary" class="tag-combo-summary">Выбери или создай тег…</span>
+                <span class="tag-combo-caret">▾</span>
+              </div>
+              <div class="tag-combo-panel" id="tagComboPanel">
+                <div id="dishTagChips" class="tag-chip-row"></div>
+                <div class="tag-combo-new">
+                  <input type="text" id="newTagInput" placeholder="+ создать новый тег…"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomDishTag();}">
+                  <button class="btn secondary small" onclick="addCustomDishTag()">Создать</button>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="dishTags" value="">
+          </div>
+        </div>
+
+        <div id="dishBlocks"></div>
+        <button class="btn secondary small" onclick="addDishBlock()" style="margin-top:4px;">+ Добавить способ готовки</button>
 
         <div class="stat-card" style="margin-top:16px;">
           <div class="pill-row">
@@ -607,9 +761,7 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
             <span>Цена (авто): <b id="dishPriceAuto">0</b></span>
           </div>
         </div>
-        <div class="field" style="margin-top:12px;"><label>Итоговая цена блюда (можно поправить вручную)</label>
-          <input type="number" id="dishPriceOverride" placeholder="оставь пустым для автоцены"></div>
-        <button class="btn" onclick="saveDish()">Сохранить блюдо</button>
+        <button class="btn" onclick="saveDish()" style="margin-top:12px;">Сохранить блюдо</button>
       </div>
     </section>
 
@@ -756,6 +908,19 @@ select.tag{padding:3px 20px 3px 10px;background-position:right 7px center;backgr
         <h2>История</h2>
         <div class="filter-bar">
           <select id="filterExercise" onchange="renderJournalList()"><option value="">Все упражнения</option></select>
+          <input type="text" id="filterDate" placeholder="Поиск по дате (напр. 06.07 или 2026-07)" oninput="renderJournalList()"
+            style="background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);padding:8px 12px;
+            border-radius:8px;font-size:13px;min-width:200px;">
+          <select id="filterWeekday" onchange="renderJournalList()">
+            <option value="">Все дни недели</option>
+            <option value="1">Понедельник</option>
+            <option value="2">Вторник</option>
+            <option value="3">Среда</option>
+            <option value="4">Четверг</option>
+            <option value="5">Пятница</option>
+            <option value="6">Суббота</option>
+            <option value="0">Воскресенье</option>
+          </select>
         </div>
         <div class="journal-table-wrap">
         <div class="journal-row head">
@@ -987,6 +1152,10 @@ function scoreExercise(ex, todayStr, favoriteGroup){
   if(ex.liked==='liked') score += 20;
   else if(ex.liked==='disliked') score -= 50;
   if(favoriteGroup && ex.muscleGroup===favoriteGroup) score += 15;
+  if(ex.ratings){
+    const avg = ratingAverage(ex.ratings, EXERCISE_RATING_CRITERIA);
+    if(avg!==null) score += Math.round((avg-3)*6);
+  }
   return score;
 }
 
@@ -1472,12 +1641,12 @@ const DEFAULT_INGREDIENTS = [
   {name:"Рис (сухой)", kcal:344, protein:6.7, fat:0.7, carb:78, price:9},
   {name:"Овсянка (сухая)", kcal:342, protein:12, fat:6, carb:59, price:7},
   {name:"Куриная грудка (сырая)", kcal:165, protein:31, fat:3.6, carb:0, price:35},
-  {name:"Яйцо куриное", kcal:157, protein:12.7, fat:11.5, carb:0.7, price:12},
+  {name:"Яйцо куриное", kcal:157, protein:12.7, fat:11.5, carb:0.7, price:12, pieceWeight:55, pricePiece:9},
   {name:"Творог 5%", kcal:121, protein:17, fat:5, carb:3, price:20},
   {name:"Молоко 2.5%", kcal:52, protein:2.8, fat:2.5, carb:4.7, price:9},
   {name:"Картофель", kcal:77, protein:2, fat:0.4, carb:16, price:5},
   {name:"Лук репчатый", kcal:41, protein:1.4, fat:0.2, carb:8.2, price:4},
-  {name:"Сосиска", kcal:266, protein:11, fat:24, carb:2, price:25},
+  {name:"Сосиска", kcal:266, protein:11, fat:24, carb:2, price:25, pieceWeight:60, pricePiece:15},
   {name:"Кетчуп", kcal:93, protein:1.6, fat:0.2, carb:20, price:15},
   {name:"Масло растительное", kcal:900, protein:0, fat:100, carb:0, price:12},
   {name:"Хлеб пшеничный", kcal:265, protein:8, fat:3, carb:50, price:6},
@@ -1681,6 +1850,54 @@ function closeNav(){
 }
 
 // ---------------------------------------------------------------------
+// Пасхалка: клик по лого/названию
+// ---------------------------------------------------------------------
+const FERRUM_JOKES = [
+  '<b>Fe</b> — 26 протонов, 0 отмазок. Иди на присед.',
+  'Железо не ждёт. Железо ждёт понедельника, потом вторника, потом... ладно, иди уже.',
+  'Согласно нашим расчётам, лучший способ «накачаться» — не читать этот текст, а положить телефон и подойти к штанге.',
+  'Ты нажал на лого вместо того, чтобы нажать на гриф. Ирония замечена.',
+  'Внимание: длительное разглядывание логотипа не увеличивает объём бицепса. Мы проверяли.',
+  'Железо любит троих: тебя, гравитацию и твоего физиотерапевта.',
+  '«Ещё один подход» — самая опасная фраза в этом приложении.',
+  'Секретный ингредиент прогресса: обычно им оказывается сон, а не эта кнопка.',
+  'Наука подтверждает: 1 клик по лого = 0 калорий. Хочешь честный прогресс — открой вкладку «Журнал».',
+  'Если бы клики по кнопкам считались подходами, ты бы уже был чемпионом. Увы.',
+  'Дзен железа: гриф не станет легче, если долго на него смотреть. Только если меньше на него класть.',
+  'Ты нашёл пасхалку. Наградой служит осознание, что можно было потратить это время на разминку.'
+];
+let ferrumClicks = 0;
+function ferrumEasterEgg(e){
+  if(e) e.stopPropagation();
+  ferrumClicks++;
+  const mark = e && e.currentTarget;
+  if(mark){
+    mark.classList.remove('ferrum-shake');
+    void mark.offsetWidth;
+    mark.classList.add('ferrum-shake');
+  }
+  let msg;
+  if(ferrumClicks>=10){
+    msg = `Клик №${ferrumClicks}. Ты кликаешь по кнопке усерднее, чем качаешь железо. Мы впечатлены и слегка обеспокоены. 🏋️`;
+  } else {
+    msg = FERRUM_JOKES[Math.floor(Math.random()*FERRUM_JOKES.length)];
+  }
+  let toast = document.getElementById('ferrumToast');
+  if(!toast){
+    toast = document.createElement('div');
+    toast.id = 'ferrumToast';
+    toast.className = 'ferrum-toast';
+    document.body.appendChild(toast);
+  }
+  toast.innerHTML = msg;
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  clearTimeout(toast._hideTimer);
+  toast._hideTimer = setTimeout(()=>toast.classList.remove('show'), 3600);
+}
+
+// ---------------------------------------------------------------------
 // KBJU calculator
 // ---------------------------------------------------------------------
 const kbjuIds = ['inWeight','inHeight','inAge','inActivity','inSurplus','inProtein','inFatPct'];
@@ -1776,6 +1993,10 @@ function scoreDish(dish, ideal, todayStr, avgPrice){
   }
   if(dish.favorite==='liked') score += 10;
   else if(dish.favorite==='disliked') score -= 50;
+  if(dish.ratings){
+    const avg = ratingAverage(dish.ratings, DISH_RATING_CRITERIA);
+    if(avg!==null) score += Math.round((avg-3)*6);
+  }
 
   return score;
 }
@@ -1902,16 +2123,23 @@ function toggleIngredientBlock(){
 
 function renderIngredients(){
   const ingredients = loadIngredients();
+  const searchEl = document.getElementById('ingredientSearch');
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
   const tbody = document.getElementById('ingredientTable');
-  tbody.innerHTML = ingredients.map((ing,i)=>`<tr>
+  const filtered = ingredients
+    .map((ing,i)=>({ing,i}))
+    .filter(({ing})=> !search || ing.name.toLowerCase().includes(search));
+  tbody.innerHTML = filtered.map(({ing,i})=>`<tr>
     <td><b>${ing.name}</b></td>
     <td class="mono">${ing.kcal}</td>
     <td class="mono">${ing.protein}</td>
     <td class="mono">${ing.fat}</td>
     <td class="mono">${ing.carb}</td>
     <td class="mono">${ing.price||0}</td>
+    <td class="mono">${ing.pieceWeight ? ing.pieceWeight+' г' : '—'}</td>
+    <td class="mono">${ing.pricePiece ? ing.pricePiece : '—'}</td>
     <td><span style="color:var(--danger);cursor:pointer;" onclick="deleteIngredient(${i})">✕</span></td>
-  </tr>`).join('');
+  </tr>`).join('') || '<tr><td colspan="9" class="note">Ничего не найдено</td></tr>';
   refreshDishIngredientOptions();
 }
 
@@ -1922,11 +2150,17 @@ function addIngredient(){
   const fat = parseFloat(document.getElementById('newIngFat').value)||0;
   const carb = parseFloat(document.getElementById('newIngCarb').value)||0;
   const price = parseFloat(document.getElementById('newIngPrice').value)||0;
+  const pieceWeightRaw = document.getElementById('newIngPieceWeight').value;
+  const piecePriceRaw = document.getElementById('newIngPiecePrice').value;
   if(!name){ alert('Укажи название ингредиента'); return; }
   const ingredients = loadIngredients();
-  ingredients.push({name, kcal, protein, fat, carb, price});
+  const ing = {name, kcal, protein, fat, carb, price};
+  if(pieceWeightRaw!=='') ing.pieceWeight = parseFloat(pieceWeightRaw)||0;
+  if(piecePriceRaw!=='') ing.pricePiece = parseFloat(piecePriceRaw)||0;
+  ingredients.push(ing);
   saveIngredients(ingredients);
-  ['newIngName','newIngKcal','newIngProtein','newIngFat','newIngCarb','newIngPrice'].forEach(id=>document.getElementById(id).value='');
+  ['newIngName','newIngKcal','newIngProtein','newIngFat','newIngCarb','newIngPrice','newIngPieceWeight','newIngPiecePrice']
+    .forEach(id=>document.getElementById(id).value='');
   renderIngredients();
 }
 
@@ -1937,36 +2171,126 @@ function deleteIngredient(index){
   renderIngredients();
 }
 
+// Effective price per 100g of raw ingredient, whichever way it was priced
+function ingredientPricePer100(ing){
+  if(!ing) return 0;
+  if(ing.pricePiece && ing.pieceWeight){
+    return ing.pricePiece / ing.pieceWeight * 100;
+  }
+  return ing.price||0;
+}
+
 // ---------------------------------------------------------------------
-// Dish constructor
+// Dish constructor — cooking-method blocks, each holding a vertical
+// stack of ingredient rows (block: способ готовки -> ингредиенты)
 // ---------------------------------------------------------------------
-let dishRows = [{ingredientIndex:0, grams:100, methodIndex:0}];
+function newDishIngredient(){ return {ingredientIndex:0, qty:100, qtyUnit:'g'}; }
+function newDishBlock(){ return {methodIndex:0, items:[newDishIngredient()]}; }
+let dishBlocks = [newDishBlock()];
+
+const LS_DISH_TAG_OPTIONS = "zt_dish_tag_options";
+function loadDishTagOptions(){
+  const raw = localStorage.getItem(LS_DISH_TAG_OPTIONS);
+  return raw ? JSON.parse(raw) : ['Завтрак','Обед','Ужин'];
+}
+function saveDishTagOptions(arr){ localStorage.setItem(LS_DISH_TAG_OPTIONS, JSON.stringify(arr)); }
+let selectedDishTags = [];
+
+// -------- unified tag select + create combobox --------
+function renderDishTagChips(){
+  const options = loadDishTagOptions();
+  const el = document.getElementById('dishTagChips');
+  if(!el) return;
+  el.innerHTML = options.map(t=>`<span class="tag-chip ${selectedDishTags.includes(t)?'active':''}"
+    onclick="toggleDishTagChip('${t.replace(/'/g,"\\'")}')">${t}</span>`).join('');
+  const hidden = document.getElementById('dishTags');
+  if(hidden) hidden.value = selectedDishTags.join(', ');
+  const combo = document.getElementById('tagCombo');
+  const summary = document.getElementById('tagComboSummary');
+  if(combo && summary){
+    combo.classList.toggle('has-tags', selectedDishTags.length>0);
+    summary.textContent = selectedDishTags.length ? selectedDishTags.join(', ') : 'Выбери или создай тег…';
+  }
+}
+function toggleDishTagChip(t){
+  if(selectedDishTags.includes(t)) selectedDishTags = selectedDishTags.filter(x=>x!==t);
+  else selectedDishTags.push(t);
+  renderDishTagChips();
+}
+function addCustomDishTag(){
+  const input = document.getElementById('newTagInput');
+  const val = input.value.trim();
+  if(!val) return;
+  const options = loadDishTagOptions();
+  if(!options.includes(val)){ options.push(val); saveDishTagOptions(options); }
+  if(!selectedDishTags.includes(val)) selectedDishTags.push(val);
+  input.value = '';
+  input.focus();
+  renderDishTagChips();
+}
+function toggleTagDropdown(e){
+  if(e) e.stopPropagation();
+  document.getElementById('tagCombo').classList.toggle('open');
+}
+document.addEventListener('click', (e)=>{
+  const combo = document.getElementById('tagCombo');
+  if(combo && combo.classList.contains('open') && !combo.contains(e.target)){
+    combo.classList.remove('open');
+  }
+});
 
 function refreshDishIngredientOptions(){
-  renderDishRows();
+  renderDishBlocks();
 }
 
-function addDishRow(){
-  dishRows.push({ingredientIndex:0, grams:100, methodIndex:0});
-  renderDishRows();
+function addDishBlock(){
+  dishBlocks.push(newDishBlock());
+  renderDishBlocks();
 }
-function removeDishRow(i){
-  dishRows.splice(i,1);
-  renderDishRows();
+function removeDishBlock(bi){
+  dishBlocks.splice(bi,1);
+  if(!dishBlocks.length) dishBlocks.push(newDishBlock());
+  renderDishBlocks();
+}
+function addDishIngredient(bi){
+  dishBlocks[bi].items.push(newDishIngredient());
+  renderDishBlocks();
+}
+function removeDishIngredient(bi, ii){
+  dishBlocks[bi].items.splice(ii,1);
+  if(!dishBlocks[bi].items.length) dishBlocks[bi].items.push(newDishIngredient());
+  renderDishBlocks();
 }
 
-function renderDishRows(){
+function renderDishBlocks(){
   const ingredients = loadIngredients();
-  const el = document.getElementById('dishRows');
-  el.innerHTML = dishRows.map((row,i)=>{
-    const ingOptions = ingredients.map((ing,ii)=>`<option value="${ii}" ${ii===row.ingredientIndex?'selected':''}>${ing.name}</option>`).join('');
-    const methodOptions = COOKING_METHODS.map((m,mi)=>`<option value="${mi}" ${mi===row.methodIndex?'selected':''}>${m.name}</option>`).join('');
-    return `<div class="dish-row">
-      <select onchange="dishRows[${i}].ingredientIndex=parseInt(this.value);calcDish();">${ingOptions}</select>
-      <input type="number" value="${row.grams}" placeholder="грамм" onchange="dishRows[${i}].grams=parseFloat(this.value)||0;calcDish();">
-      <select onchange="dishRows[${i}].methodIndex=parseInt(this.value);calcDish();">${methodOptions}</select>
-      <span class="mono" style="font-size:11px;color:var(--muted);" id="dishRowCooked${i}">—</span>
-      <span style="color:var(--danger);cursor:pointer;text-align:center;" onclick="removeDishRow(${i})">✕</span>
+  const el = document.getElementById('dishBlocks');
+  if(!el) return;
+  el.innerHTML = dishBlocks.map((block,bi)=>{
+    const rowsHtml = block.items.map((item,ii)=>{
+      const ingOpts = ingredients.map((ing,idx)=>`<option value="${idx}" ${idx===item.ingredientIndex?'selected':''}>${ing.name}</option>`).join('');
+      return `<div class="dish-row cook-ing-row">
+        <select onchange="dishBlocks[${bi}].items[${ii}].ingredientIndex=parseInt(this.value);calcDish();">${ingOpts}</select>
+        <input type="number" value="${item.qty}" placeholder="${item.qtyUnit==='g'?'грамм':'шт.'}"
+          onchange="dishBlocks[${bi}].items[${ii}].qty=parseFloat(this.value)||0;calcDish();">
+        <select onchange="dishBlocks[${bi}].items[${ii}].qtyUnit=this.value;renderDishBlocks();">
+          <option value="g" ${item.qtyUnit==='g'?'selected':''}>Грамм</option>
+          <option value="piece" ${item.qtyUnit==='piece'?'selected':''}>Нормальный (шт.)</option>
+        </select>
+        <span class="mono" style="font-size:11px;color:var(--muted);" id="dishItemCooked${bi}_${ii}">—</span>
+        <span style="color:var(--danger);cursor:pointer;text-align:center;" onclick="removeDishIngredient(${bi},${ii})">✕</span>
+      </div>`;
+    }).join('');
+    const methodOpts = COOKING_METHODS.map((m,mi)=>`<option value="${mi}" ${mi===block.methodIndex?'selected':''}>${m.name}</option>`).join('');
+    return `<div class="cook-block">
+      <div class="cook-block-head">
+        <select onchange="dishBlocks[${bi}].methodIndex=parseInt(this.value);calcDish();">${methodOpts}</select>
+        <span class="cook-arrow">→</span>
+        <span class="cook-block-label">ингредиенты</span>
+        ${dishBlocks.length>1?`<span class="cook-block-remove" onclick="removeDishBlock(${bi})">✕ удалить блок</span>`:''}
+      </div>
+      <div class="cook-block-ings">${rowsHtml}</div>
+      <button class="btn secondary small cook-add-ing" onclick="addDishIngredient(${bi})">+ Ингредиент в этот блок</button>
     </div>`;
   }).join('');
   calcDish();
@@ -1975,21 +2299,24 @@ function renderDishRows(){
 function calcDish(){
   const ingredients = loadIngredients();
   let rawWeight=0, cookedWeight=0, kcal=0, protein=0, fat=0, carb=0, priceAuto=0;
-  dishRows.forEach((row,i)=>{
-    const ing = ingredients[row.ingredientIndex];
-    if(!ing) return;
-    const grams = row.grams||0;
-    const mult = COOKING_METHODS[row.methodIndex].mult;
-    const cooked = grams*mult;
-    rawWeight += grams;
-    cookedWeight += cooked;
-    kcal += grams/100*ing.kcal;
-    protein += grams/100*ing.protein;
-    fat += grams/100*ing.fat;
-    carb += grams/100*ing.carb;
-    priceAuto += grams/100*(ing.price||0);
-    const cell = document.getElementById('dishRowCooked'+i);
-    if(cell) cell.textContent = Math.round(cooked)+' г готово';
+  dishBlocks.forEach((block,bi)=>{
+    const mult = COOKING_METHODS[block.methodIndex].mult;
+    block.items.forEach((item,ii)=>{
+      const ing = ingredients[item.ingredientIndex];
+      if(!ing) return;
+      const qty = item.qty||0;
+      const grams = item.qtyUnit==='piece' ? qty*(ing.pieceWeight||100) : qty;
+      const cooked = grams*mult;
+      rawWeight += grams;
+      cookedWeight += cooked;
+      kcal += grams/100*ing.kcal;
+      protein += grams/100*ing.protein;
+      fat += grams/100*ing.fat;
+      carb += grams/100*ing.carb;
+      priceAuto += grams/100*ingredientPricePer100(ing);
+      const cell = document.getElementById(`dishItemCooked${bi}_${ii}`);
+      if(cell) cell.textContent = Math.round(cooked)+' г готово';
+    });
   });
   document.getElementById('dishRawWeight').textContent = Math.round(rawWeight)+' г';
   document.getElementById('dishCookedWeight').textContent = Math.round(cookedWeight)+' г';
@@ -2005,8 +2332,7 @@ function saveDish(){
   const name = document.getElementById('dishName').value.trim();
   if(!name){ alert('Укажи название блюда'); return; }
   const totals = calcDish();
-  const priceOverrideRaw = document.getElementById('dishPriceOverride').value;
-  const price = priceOverrideRaw!=='' ? parseFloat(priceOverrideRaw)||0 : totals.priceAuto;
+  const price = totals.priceAuto;
   const tagsRaw = document.getElementById('dishTags').value.trim();
   const tags = tagsRaw ? tagsRaw.split(',').map(t=>t.trim()).filter(Boolean) : [];
 
@@ -2026,9 +2352,10 @@ function saveDish(){
 
   document.getElementById('dishName').value='';
   document.getElementById('dishTags').value='';
-  document.getElementById('dishPriceOverride').value='';
-  dishRows = [{ingredientIndex:0, grams:100, methodIndex:0}];
-  renderDishRows();
+  selectedDishTags = [];
+  renderDishTagChips();
+  dishBlocks = [newDishBlock()];
+  renderDishBlocks();
   renderDishList();
 }
 
@@ -2053,6 +2380,80 @@ function favoriteLabel(fav){
   if(fav==='liked') return '★ Любимое';
   if(fav==='disliked') return '👎 Не нравится';
   return '☆ Отметить';
+}
+
+// ---------------------------------------------------------------------
+// Multi-criteria rating system (dishes & exercises)
+// ---------------------------------------------------------------------
+const DISH_RATING_CRITERIA = [
+  {key:'taste', label:'Вкус'},
+  {key:'satiety', label:'Сытость'},
+  {key:'easiness', label:'Простота готовки'},
+  {key:'value', label:'Цена/качество'},
+  {key:'repeat', label:'Готовил(а) бы ещё'},
+  {key:'family', label:'Понравилось бы близким'},
+];
+const EXERCISE_RATING_CRITERIA = [
+  {key:'effectiveness', label:'Ощущаемая эффективность'},
+  {key:'enjoyment', label:'Удовольствие от процесса'},
+  {key:'difficulty', label:'Сложность выполнения'},
+  {key:'fatigue', label:'Утомляемость после'},
+  {key:'mood', label:'Настроение после'},
+  {key:'equipment', label:'Удобство/доступность места'},
+];
+
+function starRow(entityType, entityId, key, current){
+  let stars = '';
+  for(let i=1;i<=5;i++){
+    stars += `<span class="star ${i<=current?'filled':''}" onclick="setRating('${entityType}',${entityId},'${key}',${i})">★</span>`;
+  }
+  return `<span class="star-rate">${stars}</span>`;
+}
+
+function ratingAverage(ratings, criteria){
+  const vals = criteria.map(c=>ratings[c.key]||0).filter(v=>v>0);
+  return vals.length ? Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*10)/10 : null;
+}
+
+function setRating(entityType, entityId, key, value){
+  if(entityType==='dish'){
+    const dishes = loadDishes();
+    const d = dishes.find(x=>x.id===entityId);
+    if(!d) return;
+    if(!d.ratings) d.ratings = {};
+    d.ratings[key] = (d.ratings[key]===value) ? 0 : value;
+    saveDishes(dishes);
+    renderDishList();
+  } else {
+    const ex = EXERCISES[entityId];
+    if(!ex) return;
+    if(!ex.ratings) ex.ratings = {};
+    ex.ratings[key] = (ex.ratings[key]===value) ? 0 : value;
+    saveExercises(EXERCISES);
+    renderReference();
+  }
+}
+
+function dishRatingsHtml(d){
+  const ratings = d.ratings || {};
+  const avg = ratingAverage(ratings, DISH_RATING_CRITERIA);
+  return `<details class="rating-toggle">
+    <summary>Подробные оценки${avg!==null?` · <span class="rating-avg">${avg}/5</span>`:''}</summary>
+    <div class="rating-grid" style="margin-top:8px;">
+      ${DISH_RATING_CRITERIA.map(c=>`<span>${c.label}</span>${starRow('dish', d.id, c.key, ratings[c.key]||0)}`).join('')}
+    </div>
+  </details>`;
+}
+
+function exerciseRatingsHtml(e, i){
+  const ratings = e.ratings || {};
+  const avg = ratingAverage(ratings, EXERCISE_RATING_CRITERIA);
+  return `<details class="rating-toggle">
+    <summary>Подробные оценки${avg!==null?` · <span class="rating-avg">${avg}/5</span>`:''}</summary>
+    <div class="rating-grid" style="margin-top:8px;">
+      ${EXERCISE_RATING_CRITERIA.map(c=>`<span>${c.label}</span>${starRow('exercise', i, c.key, ratings[c.key]||0)}`).join('')}
+    </div>
+  </details>`;
 }
 
 function toggleResultsBlock(){
@@ -2096,16 +2497,25 @@ function dishCardHtml(d){
     <div class="pill-row" style="margin-top:6px;">
       <span>На 100г: <b>${per100.kcal} ккал</b> / Б <b>${per100.protein}</b> / Ж <b>${per100.fat}</b> / У <b>${per100.carb}</b></span>
     </div>
+    ${dishRatingsHtml(d)}
   </div>`;
 }
 
 function renderDishList(){
   const dishes = loadDishes();
   const el = document.getElementById('dishList');
+  const searchEl = document.getElementById('dishSearch');
+  const search = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  const visible = search ? dishes.filter(d=>{
+    const inName = d.name.toLowerCase().includes(search);
+    const inTags = (d.tags||[]).some(t=>t.toLowerCase().includes(search));
+    return inName || inTags;
+  }) : dishes;
   if(!dishes.length){ el.innerHTML = '<div class="note">Пока нет сохранённых блюд</div>'; return; }
+  if(!visible.length){ el.innerHTML = '<div class="note">Ничего не найдено</div>'; return; }
 
   const folders = {};
-  dishes.forEach(d=>{
+  visible.forEach(d=>{
     const tags = (d.tags && d.tags.length) ? d.tags : ['Без тега'];
     tags.forEach(t=>{
       if(!folders[t]) folders[t]=[];
@@ -2114,7 +2524,7 @@ function renderDishList(){
   });
 
   el.innerHTML = Object.keys(folders).sort().map(tag=>`
-    <details style="margin-bottom:10px;">
+    <details style="margin-bottom:10px;" ${search?'open':''}>
       <summary style="cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.03em;
         color:var(--accent);font-size:13px;padding:8px 0;">${tag} (${folders[tag].length})</summary>
       <div style="padding-top:8px;">${folders[tag].map(dishCardHtml).join('')}</div>
@@ -2184,6 +2594,7 @@ function renderReference(){
       </div>
 
       <div class="tech-note" style="margin-top:10px;">Объём цели уровня: ${targetVolume(e)}. ${e.tech}</div>
+      ${exerciseRatingsHtml(e, i)}
     </div>`;
   }).join('');
 }
@@ -2256,9 +2667,21 @@ function updateEntryNotes(id, value){
 function renderJournalList(){
   const journal = loadJournal().slice().sort((a,b)=> a.date < b.date ? 1 : -1);
   const filter = document.getElementById('filterExercise').value;
-  const filtered = filter ? journal.filter(j=>j.exercise===filter) : journal;
+  const dateQuery = (document.getElementById('filterDate').value || '').trim().toLowerCase();
+  const weekdayFilter = document.getElementById('filterWeekday').value;
+  let filtered = filter ? journal.filter(j=>j.exercise===filter) : journal;
+  if(dateQuery){
+    filtered = filtered.filter(j=>{
+      const isoDate = j.date;
+      const ruDate = j.date.split('-').reverse().join('.');
+      return isoDate.toLowerCase().includes(dateQuery) || ruDate.toLowerCase().includes(dateQuery);
+    });
+  }
+  if(weekdayFilter!==''){
+    filtered = filtered.filter(j=> String(new Date(j.date+"T00:00:00").getDay()) === weekdayFilter);
+  }
   const el = document.getElementById('journalList');
-  if(!filtered.length){ el.innerHTML = '<div class="note">Пока нет записей</div>'; return; }
+  if(!filtered.length){ el.innerHTML = '<div class="note">Ничего не найдено</div>'; return; }
 
   let html = '';
   let lastDate = null;
@@ -2452,6 +2875,18 @@ function setProgressLayout(mode){
   renderDashboard();
 }
 
+let calNav = {week:0, month:0, year:0};
+function navigateCal(dir){
+  const chartPeriodEl = document.getElementById('chartPeriod');
+  const period = chartPeriodEl ? chartPeriodEl.value : 'week';
+  calNav[period] += dir;
+  renderDashboard();
+}
+function resetCalNav(){
+  calNav = {week:0, month:0, year:0};
+  renderDashboard();
+}
+
 function renderDashboard(){
   const journal = loadJournal();
   const dates = journal.map(j=>j.date).filter(Boolean).sort();
@@ -2493,7 +2928,7 @@ function renderDashboard(){
     const offset = circ*(1-clampedPct);
     const color = isToday ? 'var(--accent)' : 'var(--steel)';
     return `<div class="cal-cell ${isToday?'today':''}" title="${dateKey}: ${value}">
-      <svg class="cal-ring" viewBox="0 0 44 44">
+      <svg class="cal-ring" viewBox="0 0 44 44" width="100%" height="100%" preserveAspectRatio="xMidYMid meet">
         <circle cx="22" cy="22" r="${r}" fill="none" stroke="var(--line)" stroke-width="3"/>
         ${value>0 ? `<circle cx="22" cy="22" r="${r}" fill="none" stroke="${color}" stroke-width="3"
           stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
@@ -2511,7 +2946,7 @@ function renderDashboard(){
 
   if(chartPeriod==='week'){
     const dow = (now.getDay()+6)%7;
-    const monday = new Date(now); monday.setDate(now.getDate()-dow);
+    const monday = new Date(now); monday.setDate(now.getDate()-dow+calNav.week*7);
     const days = []; for(let i=0;i<7;i++){ const d=new Date(monday); d.setDate(monday.getDate()+i); days.push(d); }
     const dateStrs = days.map(d=>d.toISOString().slice(0,10));
     const values = dateStrs.map(dayValue);
@@ -2522,10 +2957,20 @@ function renderDashboard(){
       const pct = chartType==='progress' ? val/100 : val/localMax;
       return calCell(dateStrs[i], d.getDate(), val, pct, dateStrs[i]===today, weekdayNames[i]);
     }).join('');
-    calHtml = `<div class="cal-wrap"><div class="cal-grid">${head}${cells}</div></div>`;
-    legendText = 'Текущая неделя. Кольцо — заполненность дня относительно лучшего дня недели, сегодня подсвечено золотым.';
+    const navLabel = `${days[0].getDate().toString().padStart(2,'0')}.${(days[0].getMonth()+1).toString().padStart(2,'0')} – ${days[6].getDate().toString().padStart(2,'0')}.${(days[6].getMonth()+1).toString().padStart(2,'0')}.${days[6].getFullYear()}`;
+    calHtml = `<div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="navigateCal(-1)">‹</button>
+        <div class="cal-nav-label">${navLabel}</div>
+        <button class="cal-nav-btn" onclick="navigateCal(1)">›</button>
+        ${calNav.week!==0 ? `<span class="cal-nav-today" onclick="resetCalNav()">Сегодня</span>` : ''}
+      </div>
+      <div class="cal-grid">${head}${cells}</div>
+    </div>`;
+    legendText = 'Кольцо — заполненность дня относительно лучшего дня недели, сегодня подсвечено золотым.';
   } else if(chartPeriod==='month'){
-    const y = now.getFullYear(), m = now.getMonth();
+    const base = new Date(now.getFullYear(), now.getMonth()+calNav.month, 1);
+    const y = base.getFullYear(), m = base.getMonth();
     const daysInMonth = new Date(y,m+1,0).getDate();
     const leadPad = (new Date(y,m,1).getDay()+6)%7;
     const dateStrs = []; for(let d=1; d<=daysInMonth; d++) dateStrs.push(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
@@ -2539,10 +2984,19 @@ function renderDashboard(){
       const pct = chartType==='progress' ? val/100 : val/localMax;
       cells += calCell(ds, i+1, val, pct, ds===today, '');
     });
-    calHtml = `<div class="cal-wrap"><div class="cal-grid month-grid">${head}${cells}</div></div>`;
-    legendText = 'Текущий месяц. Кольцо — заполненность дня относительно лучшего дня месяца, сегодня подсвечено золотым.';
+    const monthNamesFull = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+    calHtml = `<div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="navigateCal(-1)">‹</button>
+        <div class="cal-nav-label">${monthNamesFull[m]} ${y}</div>
+        <button class="cal-nav-btn" onclick="navigateCal(1)">›</button>
+        ${calNav.month!==0 ? `<span class="cal-nav-today" onclick="resetCalNav()">Сегодня</span>` : ''}
+      </div>
+      <div class="cal-grid month-grid">${head}${cells}</div>
+    </div>`;
+    legendText = 'Кольцо — заполненность дня относительно лучшего дня месяца, сегодня подсвечено золотым.';
   } else {
-    const y = now.getFullYear();
+    const y = now.getFullYear() + calNav.year;
     const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
     const values = [];
     for(let mo=0; mo<12; mo++){
@@ -2559,10 +3013,18 @@ function renderDashboard(){
     const curMonth = now.getMonth();
     const cells = values.map((val,i)=>{
       const pct = chartType==='progress' ? val/100 : val/localMax;
-      return calCell(y+'-'+String(i+1).padStart(2,'0'), monthNames[i], val, pct, i===curMonth, '');
+      return calCell(y+'-'+String(i+1).padStart(2,'0'), monthNames[i], val, pct, i===curMonth && calNav.year===0, '');
     }).join('');
-    calHtml = `<div class="cal-wrap"><div class="cal-grid year-grid">${cells}</div></div>`;
-    legendText = `Текущий год (${y}). Кольцо — заполненность месяца относительно лучшего месяца, текущий месяц подсвечен золотым.`;
+    calHtml = `<div class="cal-wrap">
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="navigateCal(-1)">‹</button>
+        <div class="cal-nav-label">${y}</div>
+        <button class="cal-nav-btn" onclick="navigateCal(1)">›</button>
+        ${calNav.year!==0 ? `<span class="cal-nav-today" onclick="resetCalNav()">Сегодня</span>` : ''}
+      </div>
+      <div class="cal-grid year-grid">${cells}</div>
+    </div>`;
+    legendText = `Кольцо — заполненность месяца относительно лучшего месяца года, текущий месяц подсвечен золотым.`;
   }
   document.getElementById('weekChart').innerHTML = calHtml;
   const legendEl = document.getElementById('calLegend');
@@ -2737,7 +3199,8 @@ renderReference();
 initJournalForm();
 renderJournalList();
 renderIngredients();
-renderDishRows();
+renderDishBlocks();
+renderDishTagChips();
 renderDishList();
 renderVitalsCharts();
 renderDashboard();
