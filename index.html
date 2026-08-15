@@ -2,428 +2,78 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Железо</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0a0a0f">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Железо">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+
+<!-- Design system: tokens -> components -> layout, in that order -->
+<link rel="stylesheet" href="css/00-tokens.css">
+<link rel="stylesheet" href="css/01-components.css">
+<link rel="stylesheet" href="css/02-layout.css">
+<link rel="stylesheet" href="css/03-utilities.css">
 </head>
 <body>
-<div class="bg-fx"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-<div id="app">
-  <div class="topbar">
-    <div class="hamburger" onclick="toggleNav()"><span></span></div>
-    <div class="brand-mark" onclick="ferrumEasterEgg(event)"><img src="icon-192.png" alt=""><span class="disp">Железо</span></div>
-  </div>
-  <div class="overlay" id="overlay" onclick="closeNav()"></div>
-  <nav id="mainNav">
-    <div class="brand">
-      <div class="brand-mark" onclick="ferrumEasterEgg(event)" title="?">
-        <img src="icon-192.png" alt="">
-        <div class="disp">Железо</div>
-      </div>
-      <div class="sub">трекер / калькулятор</div>
-    </div>
-    <div class="nav-list">
-      <div class="nav-pill" id="navPill"></div>
-      <button data-page="dashboard" class="active">Главная</button>
-      <button data-page="nutrition">Дневник здоровья</button>
-      <button data-page="schedule">График</button>
-      <button data-page="reference">Справочник</button>
-      <button data-page="journal">Журнал</button>
-      <button data-page="settings">Настройки</button>
-    </div>
-  </nav>
-  <main>
+<div class="app" id="app"></div>
 
-    <!-- DASHBOARD -->
-    <section class="page active" id="page-dashboard">
-      <h1 class="page-title">Главная</h1>
-      <div class="page-sub">Тренировка на сегодня и прогресс по упражнениям</div>
+<!-- ===== DATA LAYER (only file that touches localStorage) ===== -->
+<script src="js/data/storage.js"></script>
 
-      <div class="card">
-        <h2>Тренировка на сегодня</h2>
-        <div id="workoutSessionWrap" style="text-align:center;">
-          <button class="btn" onclick="startWorkoutSession()">▶ Начать тренировку</button>
-        </div>
-      </div>
+<!-- ===== STATE LAYER (single reactive store — everything above reads/writes through this) ===== -->
+<script src="js/state/store.js"></script>
 
-      <div class="stat-strip">
-        <div class="stat-chip"><span class="stat-chip-n" id="dbWeek">—</span><span class="stat-chip-l">Неделя программы</span></div>
-        <div class="stat-chip"><span class="stat-chip-n" id="dbSessions">—</span><span class="stat-chip-l">Тренировок записано</span></div>
-        <div class="stat-chip"><span class="stat-chip-n" id="dbDishes">—</span><span class="stat-chip-l">Количество блюд</span></div>
-      </div>
+<!-- ===== CORE / BUSINESS LOGIC (no DOM access, reads/writes only via App.State) ===== -->
+<script src="js/core/settings.js"></script>
+<script src="js/core/exercises.js"></script>
+<script src="js/core/ratings.js"></script>
+<script src="js/core/journal.js"></script>
+<script src="js/core/cookingMethods.js"></script>
+<script src="js/core/ingredients.js"></script>
+<script src="js/core/units.js"></script>
+<script src="js/core/dishTags.js"></script>
+<script src="js/core/dishConstructor.js"></script>
+<script src="js/core/kbju.js"></script>
+<script src="js/core/schedule.js"></script>
+<script src="js/core/workoutSession.js"></script>
+<script src="js/core/mealPlan.js"></script>
+<script src="js/core/pasteParser.js"></script>
+<script src="js/core/dashboard.js"></script>
+<script src="js/core/exportImport.js"></script>
+<script src="js/core/easterEgg.js"></script>
+<script src="js/core/uiPrefs.js"></script>
 
-      <div class="card">
-        <h2>Вес и сон</h2>
-        <div id="vitalsCharts"></div>
-      </div>
+<!-- ===== COMPONENTS (real DOM-node factories: Card, Button, ProgressRing, ProgressBar,
+     Chart, StatCard, ExerciseCard, ExerciseRow, SetButton, WorkoutCard, MealCard,
+     DishCard, Calendar, Modal, Tabs — no HTML-string screens) ===== -->
+<script src="js/components/dom.js"></script>
+<script src="js/components/ui.js"></script>
+<script src="js/components/popover.js"></script>
+<script src="js/components/primitives.js"></script>
+<script src="js/components/cards.js"></script>
+<script src="js/components/calendar.js"></script>
+<script src="js/components/hexagonChart.js"></script>
 
-      <div class="card">
-        <h2>Прогресс по упражнениям</h2>
-        <div class="filter-bar" style="flex-wrap:wrap;">
-          <select id="chartType" onchange="renderDashboard()">
-            <option value="volume">Объём</option>
-            <option value="sessions">Тренировок</option>
-            <option value="variety">Разных упражнений</option>
-            <option value="progress">Средний % выполнения цели</option>
-          </select>
-          <select id="chartPeriod" onchange="renderDashboard()">
-            <option value="week">Неделя</option>
-            <option value="month">Месяц</option>
-            <option value="year">Год</option>
-          </select>
-        </div>
-        <div id="weekChart"></div>
-        <div class="note cal-legend" id="calLegend"></div>
+<!-- ===== LAYOUT (arrangement shell: carousel, dots, tabs, modal) ===== -->
+<script src="js/layout/shell.js"></script>
+<script src="js/layout/modal.js"></script>
 
-        <div class="filter-bar" style="margin-top:20px;flex-wrap:wrap;">
-          <select id="progressStyle" onchange="renderDashboard()">
-            <option value="bar">Полоска</option>
-            <option value="ring">Круг</option>
-            <option value="spark">График (по тренировкам)</option>
-            <option value="dots">Точки (по тренировкам)</option>
-          </select>
-          <div style="display:flex;gap:4px;margin-left:auto;">
-            <button class="btn secondary small" id="layoutListBtn" onclick="setProgressLayout('list')">☰ Список</button>
-            <button class="btn secondary small" id="layoutGridBtn" onclick="setProgressLayout('grid')">⊞ Плитки</button>
-          </div>
-        </div>
-        <div id="statList"></div>
-        <div style="margin-top:12px;text-align:center;">
-          <button class="btn secondary small" id="expandStatsBtn" onclick="toggleStatsExpanded()">Показать всё</button>
-        </div>
-      </div>
-    </section>
+<!-- ===== SCREENS (exactly 4: Тренировки / Главная / Здоровье / Настройки,
+     each composed of Components via a shared tabbed-screen shell) ===== -->
+<script src="js/screens/_shell.js"></script>
+<script src="js/screens/training/today.js"></script>
+<script src="js/screens/training/calendar.js"></script>
+<script src="js/screens/training/schedule.js"></script>
+<script src="js/screens/training/exercises.js"></script>
+<script src="js/screens/training.js"></script>
+<script src="js/screens/home.js"></script>
+<script src="js/screens/health/diary.js"></script>
+<script src="js/screens/health/diet.js"></script>
+<script src="js/screens/health/ingredients.js"></script>
+<script src="js/screens/health.js"></script>
+<script src="js/screens/settings.js"></script>
 
-    <!-- NUTRITION -->
-    <section class="page" id="page-nutrition">
-      <h1 class="page-title">Дневник здоровья</h1>
-      <div class="page-sub">Результаты по КБЖУ и блюда</div>
-
-      <div class="card">
-        <h2>Автоподбор рациона на день</h2>
-        <div class="note">
-          Подбирает блюда из «Наших блюд» так, чтобы уложиться в КБЖУ, не повторять то, что ели вчера/позавчера,
-          учитывать бюджет и любимые блюда. Каждый раз результат немного разный — жми «Пересобрать» у конкретного приёма,
-          если не нравится вариант.
-        </div>
-        <div style="margin-top:12px;"><button class="btn" onclick="buildDayPlan()">Собрать день</button></div>
-        <div id="dayPlanWrap" style="margin-top:16px;"></div>
-      </div>
-
-      <div class="card">
-        <h2>Вес, сон и шаги</h2>
-        <div class="page-sub" style="margin-bottom:14px;">Отмечай раз в день — значения появятся в истории и в графиках на главной</div>
-        <div class="vitals-row">
-          <div class="field"><label>Дата</label><input type="date" id="vitalsDate"></div>
-          <div class="field"><label>Текущий вес, кг</label><input type="number" step="0.1" id="vitalsWeight" placeholder="напр. 76.4"></div>
-          <div class="field"><label>Текущее кол-во сна, ч</label><input type="number" step="0.25" id="vitalsSleep" placeholder="напр. 7.5"></div>
-          <div class="field"><label>Количество шагов за день</label><input type="number" step="1" id="vitalsSteps" placeholder="напр. 8500"></div>
-        </div>
-        <button class="btn" onclick="saveVitals()">Сохранить</button>
-      </div>
-
-      <div class="card">
-        <h2>Результаты</h2>
-        <div class="result-row big"><span>Целевая калорийность</span><span class="val" id="outTarget">—</span></div>
-        <button class="btn secondary small" onclick="toggleResultsBlock()" id="resultsToggleBtn" style="margin-top:4px;">Показать все</button>
-        <div id="resultsBlock" style="display:none;margin-top:6px;">
-          <div class="result-row"><span>BMR (базовый обмен)</span><span class="val" id="outBmr">—</span></div>
-          <div class="result-row"><span>TDEE (общий расход)</span><span class="val" id="outTdee">—</span></div>
-          <div class="result-row"><span>Белок</span><span class="val" id="outProteinG">—</span></div>
-          <div class="result-row"><span>Жиры</span><span class="val" id="outFatG">—</span></div>
-          <div class="result-row"><span>Углеводы</span><span class="val" id="outCarbG">—</span></div>
-          <div class="result-row"><span>Клетчатка (норма)</span><span class="val" id="outFiberG">—</span></div>
-          <div class="result-row"><span>Вода (норма)</span><span class="val" id="outWaterMl">—</span></div>
-        </div>
-        <div class="note">Параметры (вес, возраст, профицит и т.д.) редактируются на вкладке «Настройки».</div>
-      </div>
-
-      <div class="card">
-        <h2>Наши блюда</h2>
-        <div class="dish-list-head" style="margin-top:12px;">
-          <button class="btn secondary small" onclick="toggleDishBlock()" id="dishToggleBtn">Показать наши блюда</button>
-          <div class="unit-toggle">
-            <select id="dishUnitMode" onchange="setDishDisplayUnit(this.value)">
-              <option value="g">Граммы</option>
-              <option value="normal">Нормальный (ложки/стаканы)</option>
-            </select>
-          </div>
-        </div>
-        <div id="dishBlock" style="display:none;margin-top:16px;">
-          <input type="text" id="dishSearch" placeholder="Поиск блюда по названию или тегу…" oninput="renderDishList()"
-            style="width:100%;margin-bottom:14px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
-            padding:10px 12px;border-radius:8px;font-size:13px;">
-          <div id="dishList"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>Конструктор блюд</h2>
-        <button class="btn secondary small" onclick="toggleIngredientBlock()" id="ingToggleBtn">Показать список ингредиентов</button>
-
-        <div id="ingredientBlock" style="display:none;margin-top:16px;">
-          <input type="text" id="ingredientSearch" placeholder="Поиск ингредиента по названию…" oninput="renderIngredients()"
-            style="width:100%;margin-bottom:12px;background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);
-            padding:10px 12px;border-radius:8px;font-size:13px;">
-          <div class="ing-table-wrap">
-            <table>
-              <thead><tr><th>Название</th><th>Ккал/100г</th><th>Белки</th><th>Жиры</th><th>Углеводы</th><th>Клетчатка</th><th>Цена/100г</th><th>Вес 1 шт</th><th>Цена/шт</th><th></th></tr></thead>
-              <tbody id="ingredientTable"></tbody>
-            </table>
-          </div>
-          <div class="note" style="margin-top:10px;">Добавь свой ингредиент, если его нет в списке. Грамовка и цена за штуку — необязательные, нужны, если хочешь считать этот ингредиент поштучно (например яйца, ломтики хлеба):</div>
-          <div class="ing-add-grid" style="margin-top:8px;">
-            <input type="text" id="newIngName" placeholder="Название">
-            <input type="number" id="newIngKcal" placeholder="Ккал/100г">
-            <input type="number" id="newIngProtein" placeholder="Белки/100г">
-            <input type="number" id="newIngFat" placeholder="Жиры/100г">
-            <input type="number" id="newIngCarb" placeholder="Углеводы/100г">
-            <input type="number" id="newIngFiber" placeholder="Клетчатка/100г">
-            <input type="number" id="newIngPrice" placeholder="Цена/100г">
-            <input type="number" id="newIngPieceWeight" placeholder="Вес 1 шт, г (необяз.)">
-            <input type="number" id="newIngPiecePrice" placeholder="Цена за 1 шт (необяз.)">
-            <button class="btn small" onclick="addIngredient()">Добавить</button>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start;margin-top:16px;">
-          <div class="field" style="flex:2;min-width:220px;margin:0;"><label>Название блюда</label><input type="text" id="dishName" placeholder="например: Гречка с сосиской"></div>
-          <div class="field" style="flex:1;min-width:240px;margin:0;">
-            <label>Теги (для папок в «Наших блюдах»)</label>
-            <div class="tag-combo" id="tagCombo">
-              <div class="tag-combo-display" id="tagComboDisplay" onclick="toggleTagDropdown(event)">
-                <span id="tagComboSummary" class="tag-combo-summary">Выбери или создай тег…</span>
-                <span class="tag-combo-caret">▾</span>
-              </div>
-            </div>
-            <input type="hidden" id="dishTags" value="">
-          </div>
-        </div>
-
-        <div class="note" style="margin-top:14px;">Строй блюдо как цепочку: ингредиент → способ готовки → ингредиент → способ готовки и т.д. Нажми на ингредиент, чтобы задать граммовку и цену. Кнопка «+» под ингредиентом добавляет ещё один ингредиент ниже, в ту же цепочку (например, если два продукта готовятся вместе одним способом).</div>
-        <div class="dish-canvas-viewport" id="dishCanvasViewport">
-          <div id="dishChains"></div>
-        </div>
-
-        <div class="stat-card" style="margin-top:16px;">
-          <div class="pill-row">
-            <span>Вес сырых продуктов: <b id="dishRawWeight">0 г</b></span>
-            <span>Вес готового блюда: <b id="dishCookedWeight">0 г</b></span>
-            <span>Ккал: <b id="dishKcal">0</b></span>
-            <span>Белки: <b id="dishProtein">0 г</b></span>
-            <span>Жиры: <b id="dishFat">0 г</b></span>
-            <span>Углеводы: <b id="dishCarb">0 г</b></span>
-            <span>Клетчатка: <b id="dishFiber">0 г</b></span>
-            <span>Цена (авто): <b id="dishPriceAuto">0</b></span>
-          </div>
-        </div>
-        <button class="btn" onclick="saveDish()" style="margin-top:12px;">Сохранить блюдо</button>
-      </div>
-    </section>
-
-    <!-- PERSONAL SETTINGS -->
-    <section class="page" id="page-settings">
-      <h1 class="page-title">Персональные настройки</h1>
-      <div class="page-sub">Параметры для расчёта КБЖУ (набор массы)</div>
-      <div class="card">
-        <div class="field">
-          <label>Вес, кг: <span id="inWeightVal" class="mono" style="color:var(--accent);">75</span></label>
-          <input type="range" id="inWeight" min="40" max="200" step="0.5" value="75" oninput="document.getElementById('inWeightVal').textContent=this.value">
-        </div>
-        <div class="field">
-          <label>Рост, см: <span id="inHeightVal" class="mono" style="color:var(--accent);">185</span></label>
-          <input type="range" id="inHeight" min="140" max="220" step="1" value="185" oninput="document.getElementById('inHeightVal').textContent=this.value">
-        </div>
-        <div class="field">
-          <label>Возраст, лет: <span id="inAgeVal" class="mono" style="color:var(--accent);">25</span></label>
-          <input type="range" id="inAge" min="14" max="90" step="1" value="25" oninput="document.getElementById('inAgeVal').textContent=this.value">
-        </div>
-        <div class="field"><label>Активность</label>
-          <select id="inActivity">
-            <option value="1.2">Малоподвижный</option>
-            <option value="1.375">Лёгкая активность</option>
-            <option value="1.55" selected>Умеренная (4-5 трен/нед)</option>
-            <option value="1.725">Высокая</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Профицит калорий, ккал: <span id="inSurplusVal" class="mono" style="color:var(--accent);">400</span></label>
-          <input type="range" id="inSurplus" min="-500" max="1000" step="50" value="400" oninput="document.getElementById('inSurplusVal').textContent=this.value">
-        </div>
-        <div class="field">
-          <label>Белок, г/кг: <span id="inProteinVal" class="mono" style="color:var(--accent);">2.0</span></label>
-          <input type="range" id="inProtein" min="0.5" max="4" step="0.1" value="2.0" oninput="document.getElementById('inProteinVal').textContent=this.value">
-        </div>
-        <div class="field">
-          <label>Жиры, % от калорий: <span id="inFatPctVal" class="mono" style="color:var(--accent);">22</span></label>
-          <input type="range" id="inFatPct" min="10" max="40" step="1" value="22" oninput="document.getElementById('inFatPctVal').textContent=this.value">
-        </div>
-        <div class="note">Изменения сразу пересчитывают результаты на вкладке «Дневник здоровья».</div>
-      </div>
-    </section>
-
-    <!-- SCHEDULE -->
-    <section class="page" id="page-schedule">
-      <h1 class="page-title">Недельный график</h1>
-      <div class="page-sub" id="scheduleSubtitle">Суперсет = пара упражнений на противоположные группы мышц. Подход первого → 15-30 сек → подход второго → отдых 60-90 сек → повтор круга.</div>
-
-      <div class="card">
-        <h2>Профили</h2>
-        <div class="note">Профиль хранит свой формат тренировок, локацию и любимую группу мышц — свой график для каждого профиля.</div>
-        <div id="profileTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;"></div>
-        <button class="btn secondary small" onclick="addProfile()">+ Новый профиль</button>
-
-        <div id="profileSettings" style="margin-top:16px;"></div>
-      </div>
-
-      <div id="scheduleContent"></div>
-    </section>
-
-    <!-- REFERENCE -->
-    <section class="page" id="page-reference">
-      <h1 class="page-title">Справочник упражнений</h1>
-      <div class="page-sub">Целевые диапазоны, группы мышц и техника выполнения</div>
-
-      <div class="card">
-        <button class="btn secondary small" onclick="toggleAddExerciseBlock()" id="addExToggleBtn">+ Добавить своё упражнение</button>
-        <div id="addExerciseBlock" style="display:none;margin-top:16px;">
-          <div class="field"><label>Название</label><input type="text" id="newExName" placeholder="например: Отжимания на кулаках"></div>
-          <div class="grid2">
-            <div class="field"><label>Подходы</label><input type="number" id="newExSets" value="3"></div>
-            <div class="field"><label>Мин. в подходе</label><input type="number" id="newExMin" value="10"></div>
-            <div class="field"><label>Макс. в подходе</label><input type="number" id="newExMax" value="15"></div>
-            <div class="field"><label>Финальная цель</label><input type="number" id="newExFinal" value="30"></div>
-            <div class="field"><label>Ед. измерения</label>
-              <select id="newExUnit">
-                <option value="повторений">повторений</option>
-                <option value="повторений на ногу">повторений на ногу</option>
-                <option value="повторений на руку">повторений на руку</option>
-                <option value="секунд">секунд</option>
-                <option value="минут">минут</option>
-                <option value="интервалов">интервалов</option>
-              </select>
-            </div>
-            <div class="field"><label>Где делать</label>
-              <select id="newExWhere">
-                <option value="both">Дом / Улица</option>
-                <option value="home">Дом</option>
-                <option value="outside">Улица</option>
-              </select>
-            </div>
-            <div class="field"><label>Основная группа (акцент)</label>
-              <select id="newExMuscle">
-                <option>Грудь</option><option>Спина</option><option>Плечи</option>
-                <option>Руки</option><option>Ноги</option><option>Кор</option><option>Кардио</option>
-              </select>
-            </div>
-          </div>
-          <div class="note" style="margin-top:6px;">Группа мышц задаётся только сейчас, при создании — потом её нельзя будет изменить в справочнике.</div>
-          <div class="field"><label>Техника выполнения</label><textarea id="newExTech" rows="2" placeholder="как делать правильно"></textarea></div>
-          <button class="btn" onclick="addExercise()">Добавить упражнение</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="field"><input type="text" id="refSearch" placeholder="Поиск по названию упражнения..." oninput="renderReference()"></div>
-        <div id="refList"></div>
-      </div>
-    </section>
-
-    <!-- JOURNAL -->
-    <section class="page" id="page-journal">
-      <h1 class="page-title">Журнал тренировок</h1>
-      <div class="page-sub">Добавляй результат после каждой тренировки, отмечай вес и сон</div>
-
-      <div class="card">
-        <button class="btn" onclick="toggleAddEntryBlock()" id="addEntryToggleBtn">+ Добавить тренировку</button>
-        <div id="addEntryBlock" style="display:none;margin-top:16px;">
-          <div class="entry-form">
-            <div class="field"><label>Дата</label><input type="date" id="jDate"></div>
-            <div class="field"><label>Упражнение</label><select id="jExercise"></select></div>
-            <div class="field"><label>П1</label><input type="number" id="jS1"></div>
-            <div class="field"><label>П2</label><input type="number" id="jS2"></div>
-            <div class="field"><label>П3</label><input type="number" id="jS3"></div>
-            <div class="field"><label>П4</label><input type="number" id="jS4"></div>
-            <div class="field"><label>Заметки</label><input type="text" id="jNotes"></div>
-            <button class="btn" onclick="addEntry()">Добавить</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>История</h2>
-        <div class="filter-bar">
-          <select id="filterExercise" onchange="renderJournalList()"><option value="">Все упражнения</option></select>
-          <input type="text" id="filterDate" placeholder="Поиск по дате (напр. 06.07 или 2026-07)" oninput="renderJournalList()"
-            style="background:rgba(255,255,255,.045);border:1px solid var(--line);color:var(--text);padding:8px 12px;
-            border-radius:8px;font-size:13px;min-width:200px;">
-          <select id="filterWeekday" onchange="renderJournalList()">
-            <option value="">Все дни недели</option>
-            <option value="1">Понедельник</option>
-            <option value="2">Вторник</option>
-            <option value="3">Среда</option>
-            <option value="4">Четверг</option>
-            <option value="5">Пятница</option>
-            <option value="6">Суббота</option>
-            <option value="0">Воскресенье</option>
-          </select>
-        </div>
-        <div class="note" id="journalModeNote" style="margin-top:6px;"></div>
-        <div class="journal-table-wrap">
-        <div class="journal-row head">
-          <div>Дата</div><div>День</div><div>Упражнение</div><div>П1</div><div>П2</div><div>П3</div><div>П4</div><div>Итого</div><div>Заметки</div><div></div>
-        </div>
-        <div id="journalList"></div>
-        </div>
-        <div style="margin-top:14px;text-align:center;">
-          <button class="btn secondary small" id="journalShowAllBtn" onclick="toggleJournalShowAll()">Показать всё</button>
-        </div>
-      </div>
-
-      <div class="export-bar">
-        <button class="btn secondary" onclick="exportData()">Экспорт данных (.json)</button>
-        <button class="btn secondary" onclick="document.getElementById('importFile').click()">Импорт данных</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
-      </div>
-    </section>
-
-  </main>
-</div>
-
-<div class="workout-overlay" id="workoutModalOverlay">
-  <div class="workout-modal" id="workoutModalContent"></div>
-</div>
-
-  <script src="js/01-exercises.js"></script>
-  <script src="js/02-schedule.js"></script>
-  <script src="js/03-workout-session.js"></script>
-  <script src="js/04-cooking-methods.js"></script>
-  <script src="js/05-storage.js"></script>
-  <script src="js/06-navigation.js"></script>
-  <script src="js/07-easter-egg.js"></script>
-  <script src="js/08-kbju.js"></script>
-  <script src="js/09-meal-plan.js"></script>
-  <script src="js/10-ingredients.js"></script>
-  <script src="js/11-units-popovers-tags.js"></script>
-  <script src="js/12-dish-constructor.js"></script>
-  <script src="js/13-ratings-dishes.js"></script>
-  <script src="js/14-reference.js"></script>
-  <script src="js/15-journal.js"></script>
-  <script src="js/16-paste-parser.js"></script>
-  <script src="js/17-dashboard.js"></script>
-  <script src="js/18-export-import.js"></script>
-  <script src="js/19-init.js"></script>
+<!-- ===== APP INIT (wires the 4 screens into the shell) ===== -->
+<script src="js/app.js"></script>
 </body>
 </html>

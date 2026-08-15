@@ -1,0 +1,49 @@
+/* =========================================================================
+   LAYOUT
+   Owns arrangement only — where components/screens sit in the viewport.
+   No business logic and no component-internal styling lives here.
+   ========================================================================= */
+body{ overflow:hidden; }
+.app{ width:100%; height:100vh; position:relative; overflow:hidden; background:var(--bg); }
+
+.screen{ position:absolute; top:12px; left:7.5%; width:85%; height:calc(100% - 100px); border-radius:28px;
+  overflow:hidden; background:var(--surface); transition:all 0.55s var(--ease-spring); z-index:1; border:1px solid var(--border); }
+.screen[data-pos="-2"]{ transform:translateX(-180%) scale(0.72); opacity:0; }
+.screen[data-pos="-1"]{ transform:translateX(-102%) scale(0.84); opacity:0.4; }
+.screen[data-pos="0"]{ transform:translateX(0) scale(1); opacity:1; z-index:10; box-shadow:var(--shadow-modal); }
+.screen[data-pos="1"]{ transform:translateX(102%) scale(0.84); opacity:0.4; }
+.screen[data-pos="2"]{ transform:translateX(180%) scale(0.72); opacity:0; }
+.screen[data-pos="far"]{ transform:translateX(220%) scale(0.6); opacity:0; }
+.screen-content{ height:100%; overflow-y:auto; padding:20px 18px 24px; scrollbar-width:none; }
+.screen-content::-webkit-scrollbar{ display:none; }
+
+/* --- Overview (grid of all screens) --- */
+.overview-overlay{ position:absolute; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(18px); opacity:0; pointer-events:none;
+  transition:opacity .4s ease; z-index:15; }
+.app.overview .overview-overlay{ opacity:1; pointer-events:auto; }
+.app.overview .screen{ transition:all .5s var(--ease-spring); cursor:pointer; }
+.app.overview .screen{ opacity:1 !important; z-index:20; }
+
+/* --- Bottom nav: 2 screen icons | центральная кнопка «Начать» | 2 screen icons ---
+   Sits directly on the screen (no glued-on panel look): no solid fill or hard
+   top border, just a blurred fade so content can be seen scrolling underneath. */
+.bottom-nav{ position:absolute; left:0; right:0; bottom:0; height:96px; display:flex; align-items:center;
+  justify-content:space-around; padding:0 10px 8px; z-index:100; background:none; border-top:none; }
+.bottom-nav::before{ content:''; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:linear-gradient(to top, var(--surface) 0%, var(--surface) 30%, transparent 100%);
+  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  -webkit-mask-image:linear-gradient(to top, black 55%, transparent 100%);
+  mask-image:linear-gradient(to top, black 55%, transparent 100%); }
+.nav-icon{ background:none; border:none; cursor:pointer; padding:10px; display:flex; align-items:center; justify-content:center;
+  font-size:22px; line-height:1; opacity:.5; transform:scale(1); transition:transform var(--dur-base) var(--ease-spring), opacity var(--dur-base); }
+.nav-icon.active{ opacity:1; transform:scale(1.35); }
+.nav-icon-glyph{ display:block; }
+.nav-start{ width:70px; height:70px; border-radius:50%; flex-shrink:0; margin-top:-38px; border:4px solid var(--surface);
+  background:var(--accent); color:#04140d; font-size:24px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; box-shadow:var(--shadow-fab); transition:transform var(--dur-fast) var(--ease-standard); }
+.nav-start:active{ transform:scale(0.92); }
+
+@media (min-width:520px){
+  body{ display:flex; align-items:center; justify-content:center; background:#050505; }
+  .app{ width:420px; height:90vh; max-height:850px; border-radius:32px; border:1px solid var(--border); box-shadow:0 20px 60px rgba(0,0,0,.7); }
+}
