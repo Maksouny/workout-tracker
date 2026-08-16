@@ -1,7 +1,7 @@
 /* =========================================================================
    HEALTH SECTION — ДНЕВНИК
-   Порядок: Блюдо на сегодня → Показатели дня (роллеры) → КБЖУ (одна строка)
-   → Разнообразие питания (перенесено с «Рацион») → история показателей.
+   Порядок: Разнообразное питание → Блюдо на сегодня → Показатели дня
+   (роллеры) → КБЖУ (одна строка) → история показателей.
    «Быстрый импорт» перенесён в Настройки → Данные.
    ========================================================================= */
 App.Screens = App.Screens || {};
@@ -14,11 +14,12 @@ App.Screens.HealthSections.diary = (function(){
   const MP = ()=>App.Core.MealPlan;
   const Kb = ()=>App.Core.Kbju;
 
+  // Порядок: Разнообразное питание → Блюдо на сегодня → Показатели дня → КБЖУ → история.
   function build(container){
+    buildDietDiversity(container);
     buildTodayMeals(container);
     buildVitalsForm(container);
     buildKbjuSummary(container);
-    buildDietDiversity(container);
 
     let historyVisible = false;
     const historyWrap = h('div.mt-3');
@@ -139,7 +140,6 @@ App.Screens.HealthSections.diary = (function(){
     container.appendChild(card.el);
   }
 
-  // Перенесено с «Здоровье → Рацион».
   function buildDietDiversity(container){
     const diversity = MP().calculateDietDiversityIndex();
     const divBar = C.ProgressBar({pct:diversity.index||0});

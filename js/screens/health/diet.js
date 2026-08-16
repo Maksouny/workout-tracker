@@ -1,9 +1,9 @@
 /* =========================================================================
    HEALTH SECTION — РАЦИОН
-   Auto-picker (день/неделя) + список сохранённых блюд + конструктор блюд,
-   переключаемые одним тумблером «Блюда ↔ Конструктор». Редактирование
-   ингредиентов свёрнуто внутрь конструктора (кнопка «Редактировать
-   ингредиенты»). «Единицы отображения» — в самом низу экрана.
+   Единицы отображения сверху экрана, затем автоподбор (день/неделя) и
+   переключатель «Блюда ↔ Конструктор блюд» (с отступом друг от друга).
+   Редактирование ингредиентов свёрнуто внутрь конструктора (кнопка
+   «Редактировать ингредиенты»).
    ========================================================================= */
 App.Screens = App.Screens || {};
 App.Screens.HealthSections = App.Screens.HealthSections || {};
@@ -21,17 +21,19 @@ App.Screens.HealthSections.diet = (function(){
 
   let mode = 'list'; // 'list' | 'construct'
 
+  // Порядок: Единицы отображения (сверху, над «Собрать день») → автоподбор →
+  // переключатель Блюда/Конструктор блюд.
   function build(container){
+    buildUnitSelector(container);
     buildAutoPicker(container);
 
     const modeTabs = C.Tabs({items:[{key:'list',label:'Блюда'},{key:'construct',label:'Конструктор блюд'}], active:mode, onChange(key){ mode=key; paintMode(); }});
+    modeTabs.el.classList.add('mt-4');
     container.appendChild(modeTabs.el);
     const modeWrap = h('div');
     container.appendChild(modeWrap);
     function paintMode(){ clear(modeWrap); mode==='construct' ? buildConstructor(modeWrap) : buildDishList(modeWrap); }
     paintMode();
-
-    buildUnitSelector(container);
   }
 
   // ================= Автоподбор =================
@@ -261,7 +263,7 @@ App.Screens.HealthSections.diet = (function(){
     App.UI.Popover.open(anchorEl, h('div', {}, [chipsWrap, h('div.flex-gap-2.mt-2', {}, [newTagInput, addBtn.el])]));
   }
 
-  // ================= Единицы отображения (внизу экрана) =================
+  // ================= Единицы отображения (сверху экрана, над «Собрать день») =================
   function buildUnitSelector(container){
     const unitSelect = C.Select({
       value:Units().getDisplayUnit(),

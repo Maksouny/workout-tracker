@@ -82,8 +82,8 @@ App.Layout.Shell = (function(){
     closeOverview();
     updatePositions();
   }
-  function next(){ if(currentIndex<screensDef.length-1){ currentIndex++; updatePositions(); } }
-  function prev(){ if(currentIndex>0){ currentIndex--; updatePositions(); } }
+  function next(){ currentIndex = (currentIndex+1) % screensDef.length; updatePositions(); }
+  function prev(){ currentIndex = (currentIndex-1+screensDef.length) % screensDef.length; updatePositions(); }
 
   function toggleOverview(){
     isOverview = !isOverview;
@@ -108,7 +108,12 @@ App.Layout.Shell = (function(){
   }
 
   function isInteractiveTarget(target){
-    return !!(target && target.closest && target.closest('select, input, textarea, button, a, label, .btn, [data-action]'));
+    // Only real form controls need this guard (native <select>/<input> pickers can
+    // fire mousedown/mouseup at very different coordinates, which used to be
+    // misread as a swipe). Buttons/links are plain taps and never trigger that,
+    // so blocking swipes on them too just made whole button-heavy screens
+    // (e.g. Настройки) impossible to swipe from.
+    return !!(target && target.closest && target.closest('select, input, textarea'));
   }
 
   function bindSwipe(){

@@ -74,11 +74,11 @@
 .bar-fill{ height:100%; border-radius:3px; transition:width .8s ease; }
 
 /* --- Quick stat grid --- */
-.quick-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:var(--space-3); }
-.quick-card{ background:var(--surface-elevated); border-radius:var(--radius-lg); padding:14px; border:1px solid var(--border); }
+.quick-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:var(--space-3); min-width:0; }
+.quick-card{ background:var(--surface-elevated); border-radius:var(--radius-lg); padding:14px; border:1px solid var(--border); min-width:0; overflow:hidden; }
 .quick-card .icon{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:8px; font-size:16px; }
-.quick-card .value{ font-size:var(--fs-2xl); font-weight:600; margin-bottom:1px; }
-.quick-card .label{ font-size:var(--fs-xs); color:var(--text-muted); }
+.quick-card .value{ font-size:var(--fs-2xl); font-weight:600; margin-bottom:1px; overflow-wrap:anywhere; word-break:break-word; }
+.quick-card .label{ font-size:var(--fs-xs); color:var(--text-muted); overflow-wrap:anywhere; }
 
 /* --- Muscle / bar rows --- */
 .bar-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
