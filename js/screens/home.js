@@ -25,15 +25,14 @@ App.Screens.Home = (function(){
     );
     container.appendChild(indexCard.el);
 
-    // Сон / Вес / Калории / Шаги — один компактный модуль 2×2; тап по показателю
-    // раскрывает его полноценный график (тот же homeChartCard, но в модалке).
+    // Сон / Шаги / Вес — одна строка; ниже, во всю ширину — Калории (получено/потрачено).
     const statDefs = [
-      {icon:'⚖️', label:'Вес', unit:'кг', entries:J().getWeightLog().map(w=>({date:w.date, v:w.weight})), color:'var(--accent)', fillGaps:false},
       {icon:'😴', label:'Сон', unit:'ч', entries:J().getSleepLog().map(s=>({date:s.date, v:s.hours})), color:'var(--accent-blue)', fillGaps:false},
-      {icon:'🔥', label:'Калории', unit:'ккал', entries:last14Days().map(d=>({date:d, v:J().dailyBurnedCalories(d)})), color:'var(--accent-orange)', fillGaps:true},
       {icon:'👣', label:'Шаги', unit:'', entries:J().getStepsLog().map(s=>({date:s.date, v:s.steps})), color:'var(--accent-red)', fillGaps:true},
+      {icon:'⚖️', label:'Вес', unit:'кг', entries:J().getWeightLog().map(w=>({date:w.date, v:w.weight})), color:'var(--accent)', fillGaps:false},
     ];
     container.appendChild(homeStatGrid(statDefs));
+    container.appendChild(caloriesCard(todayStr));
 
     const sectionHead = h('div.section-title', {}, [
       h('span', {}, ['Топ прогресс']),
@@ -48,13 +47,8 @@ App.Screens.Home = (function(){
     top.forEach(c=>container.appendChild(topProgressCard(c)));
   }
 
-  function last14Days(){
-    const today = new Date();
-    const days = []; for(let i=13;i>=0;i--){ const d=new Date(today); d.setDate(today.getDate()-i); days.push(d.toISOString().slice(0,10)); }
-    return days;
-  }
   function homeStatGrid(statDefs){
-    const grid = h('div.quick-grid');
+    const grid = h('div.quick-grid.quick-grid-3');
     statDefs.forEach(sd=>{
       const vals = sd.entries.slice().sort((a,b)=>a.date<b.date?-1:1).filter(v=>!sd.fillGaps || v.v>0);
       const latest = vals.length ? vals[vals.length-1].v : null;
@@ -72,6 +66,19 @@ App.Screens.Home = (function(){
       grid.appendChild(tile);
     });
     return grid;
+  }
+
+  // Калории — на всю ширину: «Получено сегодня» (из отмеченных съеденными блюд)
+  // и «Потрачено сегодня» (TDEE + шаги + тренировка, см. Journal.dailyBurnedCalories).
+  function caloriesCard(todayStr){
+    const gained = Math.round(App.Core.MealPlan.dailyConsumedCalories(todayStr));
+    const spent = Math.round(J().dailyBurnedCalories(todayStr));
+    return C.Card({title:'Калории', children:[
+      h('div.kbju-row', {}, [
+        h('div.kbju-cell', {}, [h('div.value', {}, [gained]), h('div.label', {}, ['Получено сегодня'])]),
+        h('div.kbju-cell', {}, [h('div.value', {}, [spent]), h('div.label', {}, ['Потрачено сегодня'])]),
+      ]),
+    ]}).el;
   }
 
   function homeChartCard(icon, label, unit, entries, color, fillGaps){
@@ -202,10 +209,10 @@ App.Screens.Home = (function(){
     dateInput.addEventListener('input', e=>{ filterDate=e.target.value; paint(); });
     const toggleBtn = C.Button({label:'Показать всё', variant:'secondary', size:'small', onClick:()=>{ showAll=!showAll; toggleBtn.update({label: showAll?'Показать только сегодня':'Показать всё'}); paint(); }});
 
-    container.appendChild(C.Card({children:[
+    const filterCard = C.Card({children:[
       h('div.row', {}, [C.Field('Упражнение', exerciseSelect), C.Field('Дата содержит', dateInput)]),
       toggleBtn.el,
-    ]}).el);
+    ]}).el;
 
     const listWrap = h('div');
 
@@ -230,10 +237,11 @@ App.Screens.Home = (function(){
       });
     }
 
-    // Сначала статистика, затем список тренировок ("все соответствующие показатели старой версии")
+    // Сначала статистика, затем блок фильтров, затем список тренировок.
     container.appendChild(h('div.section-title', {}, ['Статистика']));
     container.appendChild(statsGrid(J().journalStats()));
 
+    container.appendChild(filterCard);
     container.appendChild(listWrap);
     paint();
   }

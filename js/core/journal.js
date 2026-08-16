@@ -76,6 +76,8 @@ App.Core.Journal = (function(){
     const KCAL_PER_STEP_PER_KG = 0.0005;
     return Math.round(steps*weight*KCAL_PER_STEP_PER_KG);
   }
+  /** Потрачено сегодня = базовое суточное потребление (TDEE, как в существующем
+      расчёте КБЖУ) + калории от шагов + калории от тренировок (по объёму повторений). */
   function dailyBurnedCalories(dateStr){
     const weight = weightOnDate(dateStr)!==null ? weightOnDate(dateStr) : (latestWeight()||70);
     const steps = stepsOnDate(dateStr);
@@ -84,7 +86,9 @@ App.Core.Journal = (function(){
     const totalReps = dayEntries.reduce((sum,j)=>sum+j.sets.reduce((a,b)=>a+b,0), 0);
     const TRAINING_KCAL_PER_REP_PER_KG = 0.003;
     const trainKcal = Math.round(totalReps*weight*TRAINING_KCAL_PER_REP_PER_KG);
-    return walkKcal + trainKcal;
+    const savedKbju = App.Core.Kbju.getSaved();
+    const baseKcal = savedKbju ? Math.round(App.Core.Kbju.computeAll(savedKbju).tdee) : 0;
+    return baseKcal + walkKcal + trainKcal;
   }
   function getSleepRecoveryCoefficient(hours){
     if(!hours || hours<=0) return 0;

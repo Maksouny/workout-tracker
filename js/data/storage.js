@@ -30,6 +30,7 @@ App.Data = (function(){
     STEPS_LOG:"zt_steps_log",
     EXERCISE_RATINGS:"zt_exercise_ratings_history",
     MEALLOG:"zt_meallog",
+    EATEN_MEALS:"zt_eaten_meals",
     DISH_TAG_OPTIONS:"zt_dish_tag_options",
     DISH_UNIT_MODE:"zt_dish_unit_mode",
     PROGRESS_LAYOUT:"zt_progress_layout",
@@ -84,6 +85,10 @@ App.Data = (function(){
     // Meal log
     loadMealLog: ()=>readJSON(KEYS.MEALLOG, []),
     saveMealLog: (a)=>writeJSON(KEYS.MEALLOG, a),
+
+    // Eaten-meal marks (отдельно от mealLog, который просто фиксирует какое блюдо подобрано)
+    loadEatenMeals: ()=>readJSON(KEYS.EATEN_MEALS, []),
+    saveEatenMeals: (a)=>writeJSON(KEYS.EATEN_MEALS, a),
 
     // Dish tags / display unit
     loadDishTagOptions: ()=>readJSON(KEYS.DISH_TAG_OPTIONS, ['Завтрак','Обед','Ужин']),

@@ -199,10 +199,25 @@ App.Core.MealPlan = (function(){
   }
   function getTodayMeals(){ return getMealsForDate(new Date().toISOString().slice(0,10)); }
 
+  // ---- Учёт съеденных блюд (отдельное состояние — данные самого блюда не меняются) ----
+  function isMealEaten(date, slotKey){ return S.get('eatenMeals').some(e=>e.date===date && e.slot===slotKey); }
+  function toggleMealEaten(date, slotKey){
+    let log = S.get('eatenMeals');
+    if(log.some(e=>e.date===date && e.slot===slotKey)) log = log.filter(e=>!(e.date===date && e.slot===slotKey));
+    else log = [...log, {date, slot:slotKey}];
+    S.set('eatenMeals', log);
+    return isMealEaten(date, slotKey);
+  }
+  /** Получено сегодня — сумма ккал блюд, отмеченных как съеденные. */
+  function dailyConsumedCalories(dateStr){
+    return getMealsForDate(dateStr).reduce((sum,m)=> sum + (m.dish && isMealEaten(dateStr, m.slot.key) ? (m.dish.kcal||0) : 0), 0);
+  }
+
   return {
     MEAL_SLOTS, WEEK_DAY_LABELS,
     getCurrentPlan, buildDayPlan, rerollSlot,
     getCurrentWeekPlan, buildWeekPlan, getMealsForDate, getTodayMeals,
     calculateDietDiversityIndex,
+    isMealEaten, toggleMealEaten, dailyConsumedCalories,
   };
 })();

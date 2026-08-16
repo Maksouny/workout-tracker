@@ -30,6 +30,7 @@ App.State = (function(){
     stepsLog:                    [D.loadStepsLog,                D.saveStepsLog],
     exerciseRatingHistory:        [D.loadExerciseRatingHistory,   D.saveExerciseRatingHistory],
     mealLog:                       [D.loadMealLog,                 D.saveMealLog],
+    eatenMeals:                     [D.loadEatenMeals,              D.saveEatenMeals],
     dishTagOptions:                 [D.loadDishTagOptions,          D.saveDishTagOptions],
     dishUnitMode:                    [D.loadDishUnitMode,            D.saveDishUnitMode],
     progressLayout:                   [D.loadProgressLayout,          D.saveProgressLayout],

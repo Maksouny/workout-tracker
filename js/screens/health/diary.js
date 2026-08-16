@@ -13,6 +13,7 @@ App.Screens.HealthSections.diary = (function(){
   const J = ()=>App.Core.Journal;
   const MP = ()=>App.Core.MealPlan;
   const Kb = ()=>App.Core.Kbju;
+  const Modal = C.Modal;
 
   // Порядок: Разнообразное питание → Блюдо на сегодня → Показатели дня → КБЖУ → история.
   function build(container){
@@ -92,16 +93,68 @@ App.Screens.HealthSections.diary = (function(){
   }
 
   function buildTodayMeals(container){
+    const todayStr = new Date().toISOString().slice(0,10);
     const today = MP().getTodayMeals();
-    const card = h('div.card.meal-today-card', {}, [
-      h('div.card-head', {}, [h('div.card-title-text', {}, ['Блюда на сегодня']), h('span.note', {}, ['Неделя →'])]),
-      ...today.map(m=>h('div.meal-today-row', {}, [
-        h('span.note', {}, [m.slot.label]),
-        h('span', {}, [m.dish ? m.dish.name : '—']),
-      ])),
-    ]);
-    card.addEventListener('click', openWeekMeals);
-    container.appendChild(card);
+    const rowsWrap = h('div');
+    function paintRows(){
+      clear(rowsWrap);
+      today.forEach(m=>{
+        if(!m.dish){
+          rowsWrap.appendChild(h('div.meal-today-row', {}, [h('span.note', {}, [m.slot.label]), h('span.note', {}, ['—'])]));
+          return;
+        }
+        const eaten = MP().isMealEaten(todayStr, m.slot.key);
+        const toggleBtn = h('button.meal-eaten-toggle'+(eaten?'.eaten':''), {type:'button', title:eaten?'Отметить несъеденным':'Отметить съеденным'}, [eaten?'✓':'+']);
+        toggleBtn.addEventListener('click', e=>{ e.stopPropagation(); MP().toggleMealEaten(todayStr, m.slot.key); paintRows(); });
+        rowsWrap.appendChild(h('div.meal-today-row', {}, [
+          toggleBtn,
+          h('span.note.grow-select', {}, [m.slot.label]),
+          h('span', {}, [m.dish.name]),
+          h('span.note.mono', {}, [`${Math.round(m.dish.kcal||0)} ккал`]),
+        ]));
+      });
+    }
+    paintRows();
+    const head = h('div.card-head', {}, [h('div.card-title-text', {}, ['Блюда на сегодня']), h('span.note', {}, ['Неделя →'])]);
+    head.addEventListener('click', openWeekMeals);
+    container.appendChild(h('div.card.meal-today-card', {}, [head, rowsWrap]));
+    container.appendChild(C.Button({label:'Оценить блюда на сегодня', variant:'secondary', block:true, onClick:()=>openDishRatingFlow(today)}).el);
+  }
+
+  // Оценка блюд «на сегодня» — тот же принцип, что и оценка упражнений после
+  // тренировки (пошаговая модалка со слайдерами), но пишет через существующий
+  // Rt().setDishRating прямо в dish.ratings, который уже учитывается MealPlan.
+  function openDishRatingFlow(todayMeals){
+    const dishes = todayMeals.map(m=>m.dish).filter(Boolean);
+    if(!dishes.length){ App.UI.toast('На сегодня блюда ещё не подобраны'); return; }
+    let index = 0;
+    const Rt = App.Core.Ratings;
+    function render(){
+      if(index>=dishes.length){
+        Modal.setContent(h('div.text-center', {}, [
+          h('div.title-md', {}, ['Оценки сохранены ✅']),
+          C.Button({label:'Ок', block:true, onClick:()=>Modal.close()}).el,
+        ]));
+        return;
+      }
+      const dish = dishes[index];
+      const grid = h('div.rating-grid.mt-4');
+      Rt.DISH_RATING_CRITERIA.forEach(c=>{
+        const slider = C.RatingSlider({value:(dish.ratings&&dish.ratings[c.key])||0, onRate:v=>Rt.setDishRating(dish.id, c.key, v)});
+        grid.append(h('span', {}, [c.label]), slider.el);
+      });
+      Modal.setContent(h('div', {}, [
+        h('div.note.mb-1', {}, [`Оцени блюдо ${index+1} из ${dishes.length}`]),
+        h('div.title-md', {}, [dish.name]),
+        grid,
+        h('div.flex-gap-3.mt-4', {}, [
+          C.Button({label:'Пропустить', variant:'secondary', size:'small', block:true, onClick:()=>{ index++; render(); }}).el,
+          C.Button({label:'Далее', size:'small', block:true, onClick:()=>{ index++; render(); }}).el,
+        ]),
+      ]));
+    }
+    Modal.open(h('div'));
+    render();
   }
 
   function openWeekMeals(){
